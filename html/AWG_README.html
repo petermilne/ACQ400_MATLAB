@@ -1,0 +1,150 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>AWG README</title><meta name="generator" content="MATLAB 8.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-06-27"><meta name="DC.source" content="AWG_README.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>AWG README</h1><!--introduction--><p>This is the readme document for the MATLAB AWG Interface for ACQ400 products from D-TACQ Solutions.</p><p>An example run of AWG control is shown before delving into the constituent parts of the application. This detail should allow you to tweak the application or create your own custom interface.</p><p>Click on the hyperlinks in this document to go to detailed views of the constituent functions. The most detailed discussion of the interface to the card is given in <a href="wavegen.html">wavegen.m</a>.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Example Run</a></li><li><a href="#4"><a href="wavegen_go.html">wavegen_go.m</a></a></li><li><a href="#5"><a href="wavegen.html">wavegen.m</a></a></li><li><a href="#6"><a href="write_to_ALL_CH.html">write_to_ALL_CH.m</a></a></li><li><a href="#7"><a href="write_to_CH.html">write_to_CH.m</a></a></li><li><a href="#8"><a href="soft_trigger.html">soft_trigger.m</a></a></li><li><a href="#9"><a href="initialise_demo.html">initialise_demo.m</a></a></li></ul></div><h2>Example Run<a name="1"></a></h2><div><ul><li>Execute the <tt>initialise_demo</tt> script.</li></ul></div><pre>&gt;&gt; initialise_demo</pre><div><ul><li>Some plots should appear and you will notice that new workspace variables have been created.</li></ul></div><p><img vspace="5" hspace="5" src="workspace.png" alt=""> </p><div><ul><li>Next, you should define your UUT (Unit Under Test) as follows.</li></ul></div><pre class="codeinput"><span class="keyword">global</span> UUT
+<span class="comment">% Without DNS</span>
+UUT = <span class="string">'10.12.196.103'</span>; <span class="comment">% IP address of YOUR product, this is just an example.</span>
+<span class="comment">% With DNS</span>
+UUT = <span class="string">'acq1001_025'</span>;
+</pre><div><ul><li>From here call the <tt>wavegen_go</tt> function with arguments</li></ul></div><pre>&gt;&gt; wavegen_go(x1,x2,x3,x4)</pre><pre>Readback from UUT
+stat:/usr/local/awgdata/ch/ch01 length:32768
+New ChanDef:16384
+stat:/usr/local/awgdata/ch/ch02 length:32768
+New ChanDef:16384
+stat:/usr/local/awgdata/ch/ch03 length:32768
+New ChanDef:16384
+stat:/usr/local/awgdata/ch/ch04 length:32768
+New ChanDef:16384</pre><div><ul><li>Now through an oscilloscope or acquisition software we can see those generated signals output on the UUT. In this case x1 thru x4 are sine waves offset by 45 degrees.</li></ul></div><p><img vspace="5" hspace="5" src="AWG.gif" alt=""> </p><h2><a href="wavegen_go.html">wavegen_go.m</a><a name="4"></a></h2><h2><a href="wavegen.html">wavegen.m</a><a name="5"></a></h2><h2><a href="write_to_ALL_CH.html">write_to_ALL_CH.m</a><a name="6"></a></h2><h2><a href="write_to_CH.html">write_to_CH.m</a><a name="7"></a></h2><h2><a href="soft_trigger.html">soft_trigger.m</a><a name="8"></a></h2><h2><a href="initialise_demo.html">initialise_demo.m</a><a name="9"></a></h2><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% AWG README
+% This is the readme document for the MATLAB AWG Interface for ACQ400
+% products from D-TACQ Solutions.
+%
+% An example run of AWG control is shown before delving into the
+% constituent parts of the application. This detail should allow you to
+% tweak the application or create your own custom interface.
+%
+% Click on the hyperlinks in this document to go to detailed views of the
+% constituent functions. The most detailed discussion of the interface to
+% the card is given in <wavegen.html wavegen.m>.
+
+
+%% Example Run
+% * Execute the |initialise_demo| script.
+%
+%  >> initialise_demo
+%
+% * Some plots should appear and you will notice that new workspace variables
+% have been created.
+%
+% <<workspace.png>>
+%
+% * Next, you should define your UUT (Unit Under Test) as follows.
+
+global UUT
+% Without DNS
+UUT = '10.12.196.103'; % IP address of YOUR product, this is just an example.
+% With DNS
+UUT = 'acq1001_025';
+%%%
+% * From here call the |wavegen_go| function with arguments
+%
+%  >> wavegen_go(x1,x2,x3,x4)
+%
+%  Readback from UUT
+%  stat:/usr/local/awgdata/ch/ch01 length:32768
+%  New ChanDef:16384
+%  stat:/usr/local/awgdata/ch/ch02 length:32768
+%  New ChanDef:16384
+%  stat:/usr/local/awgdata/ch/ch03 length:32768
+%  New ChanDef:16384
+%  stat:/usr/local/awgdata/ch/ch04 length:32768
+%  New ChanDef:16384
+
+%%%
+% * Now through an oscilloscope or acquisition software we can see those generated 
+% signals output on the UUT. In this case x1 thru x4 are sine waves offset
+% by 45 degrees.
+%
+% <<AWG.gif>>
+%
+
+
+%% <wavegen_go.html wavegen_go.m>
+
+%% <wavegen.html wavegen.m>
+
+%% <write_to_ALL_CH.html write_to_ALL_CH.m>
+
+%% <write_to_CH.html write_to_CH.m>
+    
+%% <soft_trigger.html soft_trigger.m>
+
+%% <initialise_demo.html initialise_demo.m>
+##### SOURCE END #####
+--></body></html>
