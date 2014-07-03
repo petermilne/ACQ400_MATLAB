@@ -50,7 +50,7 @@ function trans_cap(num_samp,num_ch)
         
         CHx{i} = fread(CH,num_samp,'int16');
         
-        % If you wish you can data binary file for posterity
+        % If you wish you can save data binary file for posterity
         %filename = sprintf('%s_%02d.bin',UUT,i);
         %f = fopen(filename,'w');
         %fwrite(f,CHx{i},'int32',0,'b');
@@ -79,6 +79,6 @@ function trans_cap(num_samp,num_ch)
     %ylabel('Volts');
     %legend('sig1','sig2')
     hold off
-    set(fig1,'units','normalized','outerposition',[0 0 1 1]); % MATLABs best approximation of maxiimising figure window.
+    set(fig1,'units','normalized','outerposition',[0 0 1 1]); % MATLABs best approximation of maximising figure window.
     shg
 end
