@@ -1,5 +1,6 @@
 function trans_cap32(num_samp,num_ch)
     global UUT %Make base workspace variable visible in function
+    vsf = 10/2^16; % Voltage Scaling Factor
     
     ID = tcpip(UUT,4220); % 4220 = System Controller
     ID.terminator = 10; % ASCII line feed
@@ -71,6 +72,7 @@ function trans_cap32(num_samp,num_ch)
     
     fig1 = figure(1);
     for i=1:num_ch
+        CHx{i} = CHx{i}.*vsf;
         plot(CHx{i})
     end
     
