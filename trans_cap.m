@@ -1,5 +1,6 @@
 function trans_cap(num_samp,num_ch)
     global UUT %Make base workspace variable visible in function
+    disp(UUT)
     vsf = 10/2^16; % Voltage Scaling Factor
     
     ID = tcpip(UUT,4220); % 4220 = System Controller
@@ -31,6 +32,7 @@ function trans_cap(num_samp,num_ch)
 %             break
 %         end
 %     end
+
     
     %% Pull transient data from channels 53001:53032
     %  Store results in array indexed 1:32
@@ -42,6 +44,7 @@ function trans_cap(num_samp,num_ch)
     for i=1:num_ch
         
         channel=53000+i;
+        disp(i);
         CH = tcpip(UUT,channel);
         set(CH,'ByteOrder','littleEndian'); % Set link endianness
         CH.terminator = 10; % ASCII carriage returns
@@ -70,10 +73,13 @@ function trans_cap(num_samp,num_ch)
     close all
     hold all
     
+    %for i=1:num_ch
+    %CHx{i} = CHx{i}.*vsf;
+    %end
+    
     fig1 = figure(1);
     for i=1:num_ch
-        CHx{i} = CHx{i}.*vsf;
-        plot(CHx{i})
+                plot(CHx{i})
     end
     
     %title('Transient Capture') 
