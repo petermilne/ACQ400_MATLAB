@@ -9,7 +9,7 @@ function trans_cap(num_samp,num_ch)
     ID.Timeout = 60;
     fopen(ID);
     
-    command = sprintf('soft_transient %s',num_samp);
+    command = sprintf('soft_transient %s',1000000);
     fprintf(ID,command); % Sets up soft_transient
     readback = fscanf(ID);
     fprintf('%s',readback);
