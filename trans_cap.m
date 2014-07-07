@@ -61,12 +61,16 @@ function trans_cap(num_samp,num_ch)
         %fclose(f);
         
         fclose(CH);
+        delete(CH);
         
     end
     
     fclose(ID);
+    delete(ID);
     
+    whos CHx
     fprintf('\n...Data Transfer Complete...\n\n');
+    save('CHx.mat','CHx') % Save MATLAB variable for retrieval in Base Workspace
     
     %% Plot all 32CH on a graph and enable plotting controls
     % "hold on" OR one plot command
@@ -79,7 +83,7 @@ function trans_cap(num_samp,num_ch)
     
     fig1 = figure(1);
     for i=1:num_ch
-                plot(CHx{i})
+        plot(CHx{i})
     end
     
     %title('Transient Capture') 

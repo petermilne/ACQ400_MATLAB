@@ -17,4 +17,5 @@ function write_to_CH(data,CH)
     fwrite(ID,data,'int16'); % Write data to UUT
     
     fclose(ID);
+    delete(ID);
 end

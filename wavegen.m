@@ -75,4 +75,5 @@ function wavegen(loop,file1,file2,file3,file4)
     %%readback=readback';
     %%disp(readback)
     fclose(ID);
+    delete(ID);
 end

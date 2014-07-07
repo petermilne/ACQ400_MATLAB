@@ -1,5 +1,5 @@
 function trans_cap32(num_samp,num_ch)
-tic
+%tic
     global UUT %Make base workspace variable visible in function
     disp(UUT)
     vsf = 10/2^32; % Voltage Scaling Factor
@@ -93,5 +93,5 @@ tic
     hold off
     set(fig1,'units','normalized','outerposition',[0 0 1 1]); % MATLABs best approximation of maximising figure window.
     shg
-toc
+%toc
 end

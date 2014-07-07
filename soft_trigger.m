@@ -14,4 +14,5 @@ function soft_trigger()
     fprintf(ID,'soft_trigger'); % This kicks of queued AWG AO command.
     
     fclose(ID);
+    delete(ID);
 end
