@@ -9,30 +9,35 @@ function trans_cap(num_samp,num_ch)
     ID.Timeout = 60;
     fopen(ID);
     
+    command = 'shot_complete';
+    fprintf(ID,command); % Queries the value of shot_complete on UUT
+    pre = fscanf(ID); % Map response of query to 'pre'
+    %disp(pre)
+    
     command = sprintf('soft_transient %s',1000000);
     fprintf(ID,command); % Sets up soft_transient
     readback = fscanf(ID);
     fprintf('%s',readback);
     
-    command = 'shot_complete';
-    %fprintf(ID,command); % Queries the value of shot_complete on UUT
-    %pre = fscanf(ID); % Map response of query to 'pre'
-    %disp(pre)
-
+    
     %% Poll shot_complete
     %  Map result to POST. When it increments, and POST is
     %  one greater than PRE loop breaks.
-%     while true
-%         fprintf(ID,command);
-%         post = fscanf(ID);
-%         disp(post)
-%         
-%         if (post > pre)
-%             printf('\n...Transient Capture Complete...\n');
-%             break
-%         end
-%     end
+    command = 'shot';
+    while true
+        fprintf(ID,command);
+        post = fscanf(ID);
+        post = str2double(post);
+        %disp(post)
+        
+        if (post > pre)
+            fprintf('\n...Transient Capture Complete...\n\n');
+            break
+        end
+    end
 
+    fclose(ID);
+    delete(ID);
     
     %% Pull transient data from channels 53001:53032
     %  Store results in array indexed 1:32
@@ -65,8 +70,7 @@ function trans_cap(num_samp,num_ch)
         
     end
     
-    fclose(ID);
-    delete(ID);
+    
     
     whos CHx
     fprintf('\n...Data Transfer Complete...\n\n');
@@ -77,9 +81,9 @@ function trans_cap(num_samp,num_ch)
     close all
     hold all
     
-    %for i=1:num_ch
-    %CHx{i} = CHx{i}.*vsf;
-    %end
+    for i=1:num_ch
+    CHx{i} = CHx{i}.*vsf;
+    end
     
     fig1 = figure(1);
     for i=1:num_ch

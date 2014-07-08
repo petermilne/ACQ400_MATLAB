@@ -10,29 +10,33 @@ function trans_cap32(num_samp,num_ch)
     ID.Timeout = 60;
     fopen(ID);
     
+    command = 'shot';
+    fprintf(ID,command); % Queries the value of shot_complete on UUT
+    pre = fscanf(ID); % Map response of query to 'pre'
+    pre = str2double(pre);
+    %disp(pre)
+    
     command = sprintf('soft_transient %s',1000000);
     fprintf(ID,command); % Sets up soft_transient
     readback = fscanf(ID);
     fprintf('%s',readback);
     
-    command = 'shot_complete';
-    %fprintf(ID,command); % Queries the value of shot_complete on UUT
-    %pre = fscanf(ID); % Map response of query to 'pre'
-    %disp(pre)
 
-    %% Poll shot_complete
+    %% Poll shot
     %  Map result to POST. When it increments, and POST is
     %  one greater than PRE loop breaks.
-%     while true
-%         fprintf(ID,command);
-%         post = fscanf(ID);
-%         disp(post)
-%         
-%         if (post > pre)
-%             printf('\n...Transient Capture Complete...\n');
-%             break
-%         end
-%     end
+    command = 'shot';
+    while true
+        fprintf(ID,command);
+        post = fscanf(ID);
+        post = str2double(post);
+        %disp(post)
+        
+        if (post > pre)
+            fprintf('\n...Transient Capture Complete...\n\n');
+            break
+        end
+    end
 
     fclose(ID);
     delete(ID);
@@ -40,10 +44,10 @@ function trans_cap32(num_samp,num_ch)
     %% Pull transient data from channels 53001:53032
     %  Store results in array indexed 1:32
     
-    pause(5)%temporary wait, this would normally be served by the WHILE above
+    %pause(5)%temporary wait, this would normally be served by the WHILE above
     
     clear CHx
-    disp('...Pulling Channel Data from D-TACQ ACQ...');
+    fprintf('...Pulling Channel Data from D-TACQ ACQ...');
     for i=1:num_ch
         
         channel=53000+i;
