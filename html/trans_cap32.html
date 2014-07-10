@@ -67,7 +67,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
   </style></head><body><div class="content"><h1>trans_cap32.m</h1><!--introduction--><h2>Contents</h2><div><ul><li><a href="#1">trans_cap32.m</a></li><li><a href="#3">Poll shot_complete</a></li><li><a href="#4">Pull transient data from channels 53001:53032</a></li><li><a href="#5">Plot all 32CH on a graph and enable plotting controls</a></li></ul></div><h2>trans_cap32.m<a name="1"></a></h2><p>This function allows the user to grab a fixed length of 32-bit data from the UUT.</p><p>A <tt>soft_transient</tt> command is sent to the System Controller (Port 4220). Once the value of shot_complete increments by one, data is ready to be pulled from Ports 53001:53032.</p><p>Arguments to the function are number of samples, <tt>num_samp</tt> and number of channels, <tt>num_ch</tt>. The maximum number of samples which can be pulled is <b>100,000</b>.</p><pre class="codeinput"><span class="keyword">function</span> trans_cap32(num_samp,num_ch)
-</pre><pre class="codeinput"><span class="comment">%tic</span>
+<span class="comment">%tic</span>
     <span class="keyword">global</span> UUT <span class="comment">%Make base workspace variable visible in function</span>
     disp(UUT)
     vsf = 20/2^32; <span class="comment">% Voltage Scaling Factor</span>
@@ -156,7 +156,7 @@ one greater than PRE loop breaks.</pre><pre class="codeinput">    command = <spa
     set(fig1,<span class="string">'units'</span>,<span class="string">'normalized'</span>,<span class="string">'outerposition'</span>,[0 0 1 1]); <span class="comment">% MATLABs best approximation of maximising figure window.</span>
     shg
 <span class="comment">%toc</span>
-</pre><pre class="codeinput"><span class="keyword">end</span>
+<span class="keyword">end</span>
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% trans_cap32.m
