@@ -1,16 +1,16 @@
-%% trans_cap32.m
-% This function allows the user to grab a fixed length of 32-bit data from the UUT.
+%% trans_cap16.m
+% This function allows the user to grab a fixed length of 16-bit data from the UUT.
 %
 % A |soft_transient| command is sent to the System Controller (Port 4220). Once the value of
 % shot_complete increments by one, data is ready to be pulled from Ports 53001:53032.
 %
 % Arguments to the function are number of samples, |num_samp| and number of channels, |num_ch|.
 % The maximum number of samples which can be pulled is *100,000*.
-function trans_cap32(num_samp,num_ch)
+function trans_cap16(num_samp,num_ch)
 %tic
     global UUT %Make base workspace variable visible in function
     disp(UUT)
-    vsf = 20/2^32; % Voltage Scaling Factor
+    vsf = 20/2^16; % Voltage Scaling Factor
     samp_rate = 48000; % Sample rate
     
     ID = tcpip(UUT,4220); % 4220 = System Controller
@@ -60,11 +60,11 @@ function trans_cap32(num_samp,num_ch)
         CH = tcpip(UUT,channel);
         set(CH,'ByteOrder','littleEndian'); % Set link endianness
         CH.terminator = 10; % ASCII carriage returns
-        CH.InputBufferSize = num_samp*32; % num_samp * 32 bits
+        CH.InputBufferSize = num_samp*16; % num_samp * 16 bits
         CH.Timeout = 60;
         fopen(CH);
         
-        CHx{i} = fread(CH,num_samp,'int32');
+        CHx{i} = fread(CH,num_samp,'int16');
         
         % If you wish you can save channel data to binary file for posterity
         %filename = sprintf('%s_%02d.bin',UUT,i);

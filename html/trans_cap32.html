@@ -1,0 +1,272 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>trans_cap32</title><meta name="generator" content="MATLAB 8.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-07-10"><meta name="DC.source" content="trans_cap32.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>trans_cap32.m</h1><!--introduction--><h2>Contents</h2><div><ul><li><a href="#1">trans_cap32.m</a></li><li><a href="#3">Poll shot_complete</a></li><li><a href="#4">Pull transient data from channels 53001:53032</a></li><li><a href="#5">Plot all 32CH on a graph and enable plotting controls</a></li></ul></div><h2>trans_cap32.m<a name="1"></a></h2><p>This function allows the user to grab a fixed length of 32-bit data from the UUT.</p><p>A <tt>soft_transient</tt> command is sent to the System Controller (Port 4220). Once the value of shot_complete increments by one, data is ready to be pulled from Ports 53001:53032.</p><p>Arguments to the function are number of samples, <tt>num_samp</tt> and number of channels, <tt>num_ch</tt>. The maximum number of samples which can be pulled is <b>100,000</b>.</p><pre class="codeinput"><span class="keyword">function</span> trans_cap32(num_samp,num_ch)
+</pre><pre class="codeinput"><span class="comment">%tic</span>
+    <span class="keyword">global</span> UUT <span class="comment">%Make base workspace variable visible in function</span>
+    disp(UUT)
+    vsf = 20/2^32; <span class="comment">% Voltage Scaling Factor</span>
+    samp_rate = 48000; <span class="comment">% Sample rate</span>
+
+    ID = tcpip(UUT,4220); <span class="comment">% 4220 = System Controller</span>
+    ID.terminator = 10; <span class="comment">% ASCII line feed</span>
+    ID.InputBufferSize = 100;
+    ID.Timeout = 60;
+    fopen(ID);
+
+    command = <span class="string">'shot_complete'</span>;
+    fprintf(ID,command); <span class="comment">% Queries the value of shot_complete on UUT</span>
+    pre = fscanf(ID); <span class="comment">% Map response of query to 'pre'</span>
+    pre = str2double(pre);
+    <span class="comment">%disp(pre)</span>
+
+    command = sprintf(<span class="string">'soft_transient %s'</span>,1000000);
+    fprintf(ID,command); <span class="comment">% Sets up soft_transient</span>
+    readback = fscanf(ID);
+    fprintf(<span class="string">'%s'</span>,readback);
+</pre><h2>Poll shot_complete<a name="3"></a></h2><pre>Map result to POST. When it increments, and POST is
+one greater than PRE loop breaks.</pre><pre class="codeinput">    command = <span class="string">'shot_complete'</span>;
+    <span class="keyword">while</span> true
+        fprintf(ID,command);
+        post = fscanf(ID);
+        post = str2double(post);
+        <span class="comment">%disp(post)</span>
+
+        <span class="keyword">if</span> (post &gt; pre)
+            fprintf(<span class="string">'\n...Transient Capture Complete...\n\n'</span>);
+            <span class="keyword">break</span>
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    fclose(ID);
+    delete(ID);
+</pre><h2>Pull transient data from channels 53001:53032<a name="4"></a></h2><pre>Store results in array indexed 1:32</pre><pre class="codeinput">    clear <span class="string">CHx</span>
+    fprintf(<span class="string">'...Pulling Channel Data from D-TACQ ACQ...\n'</span>);
+    <span class="keyword">for</span> i=1:num_ch
+        channel=53000+i;
+        disp(i);
+        CH = tcpip(UUT,channel);
+        set(CH,<span class="string">'ByteOrder'</span>,<span class="string">'littleEndian'</span>); <span class="comment">% Set link endianness</span>
+        CH.terminator = 10; <span class="comment">% ASCII carriage returns</span>
+        CH.InputBufferSize = num_samp*32; <span class="comment">% num_samp * 32 bits</span>
+        CH.Timeout = 60;
+        fopen(CH);
+
+        CHx{i} = fread(CH,num_samp,<span class="string">'int32'</span>);
+
+        <span class="comment">% If you wish you can save channel data to binary file for posterity</span>
+        <span class="comment">%filename = sprintf('%s_%02d.bin',UUT,i);</span>
+        <span class="comment">%f = fopen(filename,'w');</span>
+        <span class="comment">%fwrite(f,CHx{i},'int32',0,'b');</span>
+        <span class="comment">%fclose(f);</span>
+
+        fclose(CH);
+        delete(CH);
+    <span class="keyword">end</span>
+
+    whos <span class="string">CHx</span>
+    fprintf(<span class="string">'\n...Data Transfer Complete...\n\n'</span>);
+    save(<span class="string">'CHx.mat'</span>,<span class="string">'CHx'</span>) <span class="comment">% Save MATLAB variable for retrieval in Base Workspace</span>
+</pre><h2>Plot all 32CH on a graph and enable plotting controls<a name="5"></a></h2><p>"hold all" OR one plot command</p><pre class="codeinput">    close <span class="string">all</span>
+    hold <span class="string">all</span>
+
+    <span class="keyword">for</span> i=1:num_ch
+    CHx{i} = CHx{i}.*vsf; <span class="comment">% Scale to volts</span>
+    <span class="keyword">end</span>
+
+    index = 1:num_samp;
+    <span class="comment">%index = index./samp_rate; %Uncomment this line for seconds on x-axis</span>
+
+    fig1 = figure(1);
+    <span class="keyword">for</span> i=1:num_ch
+        plot(index, CHx{i})
+    <span class="keyword">end</span>
+
+    <span class="comment">%title('Transient Capture')</span>
+    xlabel(<span class="string">'Samples'</span>);
+    <span class="comment">%xlabel('Seconds');</span>
+    ylabel(<span class="string">'Volts'</span>);
+    <span class="comment">%legend('sig1','sig2')</span>
+    hold <span class="string">off</span>
+    set(fig1,<span class="string">'units'</span>,<span class="string">'normalized'</span>,<span class="string">'outerposition'</span>,[0 0 1 1]); <span class="comment">% MATLABs best approximation of maximising figure window.</span>
+    shg
+<span class="comment">%toc</span>
+</pre><pre class="codeinput"><span class="keyword">end</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% trans_cap32.m
+% This function allows the user to grab a fixed length of 32-bit data from the UUT.
+%
+% A |soft_transient| command is sent to the System Controller (Port 4220). Once the value of
+% shot_complete increments by one, data is ready to be pulled from Ports 53001:53032.
+%
+% Arguments to the function are number of samples, |num_samp| and number of channels, |num_ch|.
+% The maximum number of samples which can be pulled is *100,000*.
+function trans_cap32(num_samp,num_ch)
+%tic
+    global UUT %Make base workspace variable visible in function
+    disp(UUT)
+    vsf = 20/2^32; % Voltage Scaling Factor
+    samp_rate = 48000; % Sample rate
+    
+    ID = tcpip(UUT,4220); % 4220 = System Controller
+    ID.terminator = 10; % ASCII line feed
+    ID.InputBufferSize = 100;
+    ID.Timeout = 60;
+    fopen(ID);
+    
+    command = 'shot_complete';
+    fprintf(ID,command); % Queries the value of shot_complete on UUT
+    pre = fscanf(ID); % Map response of query to 'pre'
+    pre = str2double(pre);
+    %disp(pre)
+    
+    command = sprintf('soft_transient %s',1000000);
+    fprintf(ID,command); % Sets up soft_transient
+    readback = fscanf(ID);
+    fprintf('%s',readback);
+    
+
+    %% Poll shot_complete
+    %  Map result to POST. When it increments, and POST is
+    %  one greater than PRE loop breaks.
+    command = 'shot_complete';
+    while true
+        fprintf(ID,command);
+        post = fscanf(ID);
+        post = str2double(post);
+        %disp(post)
+        
+        if (post > pre)
+            fprintf('\n...Transient Capture Complete...\n\n');
+            break
+        end
+    end
+
+    fclose(ID);
+    delete(ID);
+    
+    %% Pull transient data from channels 53001:53032
+    %  Store results in array indexed 1:32  
+    clear CHx
+    fprintf('...Pulling Channel Data from D-TACQ ACQ...\n');
+    for i=1:num_ch
+        channel=53000+i;
+        disp(i);
+        CH = tcpip(UUT,channel);
+        set(CH,'ByteOrder','littleEndian'); % Set link endianness
+        CH.terminator = 10; % ASCII carriage returns
+        CH.InputBufferSize = num_samp*32; % num_samp * 32 bits
+        CH.Timeout = 60;
+        fopen(CH);
+        
+        CHx{i} = fread(CH,num_samp,'int32');
+        
+        % If you wish you can save channel data to binary file for posterity
+        %filename = sprintf('%s_%02d.bin',UUT,i);
+        %f = fopen(filename,'w');
+        %fwrite(f,CHx{i},'int32',0,'b');
+        %fclose(f);
+        
+        fclose(CH);
+        delete(CH);
+    end
+    
+    whos CHx
+    fprintf('\n...Data Transfer Complete...\n\n');
+    save('CHx.mat','CHx') % Save MATLAB variable for retrieval in Base Workspace
+    
+    %% Plot all 32CH on a graph and enable plotting controls
+    % "hold all" OR one plot command
+    close all
+    hold all
+    
+    for i=1:num_ch
+    CHx{i} = CHx{i}.*vsf; % Scale to volts
+    end
+    
+    index = 1:num_samp;
+    %index = index./samp_rate; %Uncomment this line for seconds on x-axis
+    
+    fig1 = figure(1);
+    for i=1:num_ch
+        plot(index, CHx{i})
+    end
+    
+    %title('Transient Capture') 
+    xlabel('Samples');
+    %xlabel('Seconds');
+    ylabel('Volts');
+    %legend('sig1','sig2')
+    hold off
+    set(fig1,'units','normalized','outerposition',[0 0 1 1]); % MATLABs best approximation of maximising figure window.
+    shg
+%toc
+end
+##### SOURCE END #####
+--></body></html>
