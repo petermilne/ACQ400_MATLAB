@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>trans_cap32</title><meta name="generator" content="MATLAB 8.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-07-10"><meta name="DC.source" content="trans_cap32.m"><style type="text/css">
+      --><title>trans_cap32</title><meta name="generator" content="MATLAB 8.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-07-11"><meta name="DC.source" content="trans_cap32.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,7 +66,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>trans_cap32.m</h1><!--introduction--><h2>Contents</h2><div><ul><li><a href="#1">trans_cap32.m</a></li><li><a href="#3">Poll shot_complete</a></li><li><a href="#4">Pull transient data from channels 53001:53032</a></li><li><a href="#5">Plot all 32CH on a graph and enable plotting controls</a></li></ul></div><h2>trans_cap32.m<a name="1"></a></h2><p>This function allows the user to grab a fixed length of 32-bit data from the UUT.</p><p>A <tt>soft_transient</tt> command is sent to the System Controller (Port 4220). Once the value of shot_complete increments by one, data is ready to be pulled from Ports 53001:53032.</p><p>Arguments to the function are number of samples, <tt>num_samp</tt> and number of channels, <tt>num_ch</tt>. The maximum number of samples which can be pulled is <b>100,000</b>.</p><pre class="codeinput"><span class="keyword">function</span> trans_cap32(num_samp,num_ch)
+  </style></head><body><div class="content"><h1>trans_cap32.m</h1><h2>Contents</h2><div><ul><li><a href="#1">trans_cap32.m</a></li><li><a href="#3">Poll shot_complete</a></li><li><a href="#4">Pull transient data from channels 53001:53032</a></li><li><a href="#5">Plot all 32CH on a graph and enable plotting controls</a></li></ul></div><h2>trans_cap32.m<a name="1"></a></h2><p>This function allows the user to grab a fixed length of 32-bit data from the UUT.</p><p>A <tt>soft_transient</tt> command is sent to the System Controller (Port 4220). Once the value of shot_complete increments by one, data is ready to be pulled from Ports 53001:53032.</p><p>Arguments to the function are number of samples, <tt>num_samp</tt> and number of channels, <tt>num_ch</tt>. The maximum number of samples which can be pulled is <b>100,000</b>.</p><pre class="codeinput"><span class="keyword">function</span> trans_cap32(num_samp,num_ch)
 <span class="comment">%tic</span>
     <span class="keyword">global</span> UUT <span class="comment">%Make base workspace variable visible in function</span>
     disp(UUT)
@@ -85,12 +85,14 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
     pre = str2double(pre);
     <span class="comment">%disp(pre)</span>
 
-    command = sprintf(<span class="string">'soft_transient %s'</span>,1000000);
+    command = sprintf(<span class="string">'soft_transient %d'</span>,num_samp);
+    disp(command)
     fprintf(ID,command); <span class="comment">% Sets up soft_transient</span>
     readback = fscanf(ID);
     fprintf(<span class="string">'%s'</span>,readback);
 </pre><h2>Poll shot_complete<a name="3"></a></h2><pre>Map result to POST. When it increments, and POST is
 one greater than PRE loop breaks.</pre><pre class="codeinput">    command = <span class="string">'shot_complete'</span>;
+    fprintf(<span class="string">'\n...Running Transient Capture ...\n'</span>);
     <span class="keyword">while</span> true
         fprintf(ID,command);
         post = fscanf(ID);
@@ -106,7 +108,7 @@ one greater than PRE loop breaks.</pre><pre class="codeinput">    command = <spa
     fclose(ID);
     delete(ID);
 </pre><h2>Pull transient data from channels 53001:53032<a name="4"></a></h2><pre>Store results in array indexed 1:32</pre><pre class="codeinput">    clear <span class="string">CHx</span>
-    fprintf(<span class="string">'...Pulling Channel Data from D-TACQ ACQ...\n'</span>);
+    fprintf(<span class="string">'...Pulling Channel Data from D-TACQ ACQ...\n\n'</span>);
     <span class="keyword">for</span> i=1:num_ch
         channel=53000+i;
         disp(i);
@@ -186,7 +188,8 @@ function trans_cap32(num_samp,num_ch)
     pre = str2double(pre);
     %disp(pre)
     
-    command = sprintf('soft_transient %s',1000000);
+    command = sprintf('soft_transient %d',num_samp);
+    disp(command)
     fprintf(ID,command); % Sets up soft_transient
     readback = fscanf(ID);
     fprintf('%s',readback);
@@ -196,6 +199,7 @@ function trans_cap32(num_samp,num_ch)
     %  Map result to POST. When it increments, and POST is
     %  one greater than PRE loop breaks.
     command = 'shot_complete';
+    fprintf('\n...Running Transient Capture ...\n');
     while true
         fprintf(ID,command);
         post = fscanf(ID);
@@ -214,7 +218,7 @@ function trans_cap32(num_samp,num_ch)
     %% Pull transient data from channels 53001:53032
     %  Store results in array indexed 1:32  
     clear CHx
-    fprintf('...Pulling Channel Data from D-TACQ ACQ...\n');
+    fprintf('...Pulling Channel Data from D-TACQ ACQ...\n\n');
     for i=1:num_ch
         channel=53000+i;
         disp(i);
@@ -226,7 +230,7 @@ function trans_cap32(num_samp,num_ch)
         fopen(CH);
         
         CHx{i} = fread(CH,num_samp,'int32');
-        
+                
         % If you wish you can save channel data to binary file for posterity
         %filename = sprintf('%s_%02d.bin',UUT,i);
         %f = fopen(filename,'w');
