@@ -25,7 +25,8 @@ function trans_cap16(num_samp,num_ch)
     pre = str2double(pre);
     %disp(pre)
     
-    command = sprintf('soft_transient %s',1000000);
+    command = sprintf('soft_transient %d',num_samp);
+    disp(command)
     fprintf(ID,command); % Sets up soft_transient
     readback = fscanf(ID);
     fprintf('%s',readback);
@@ -35,6 +36,7 @@ function trans_cap16(num_samp,num_ch)
     %  Map result to POST. When it increments, and POST is
     %  one greater than PRE loop breaks.
     command = 'shot_complete';
+    fprintf('\n...Running Transient Capture ...\n');
     while true
         fprintf(ID,command);
         post = fscanf(ID);

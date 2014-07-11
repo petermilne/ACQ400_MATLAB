@@ -25,7 +25,8 @@ function trans_cap32(num_samp,num_ch)
     pre = str2double(pre);
     %disp(pre)
     
-    command = sprintf('soft_transient %s',1000000);
+    command = sprintf('soft_transient %d',num_samp);
+    disp(command)
     fprintf(ID,command); % Sets up soft_transient
     readback = fscanf(ID);
     fprintf('%s',readback);
@@ -35,6 +36,7 @@ function trans_cap32(num_samp,num_ch)
     %  Map result to POST. When it increments, and POST is
     %  one greater than PRE loop breaks.
     command = 'shot_complete';
+    fprintf('\n...Running Transient Capture ...\n');
     while true
         fprintf(ID,command);
         post = fscanf(ID);
@@ -53,7 +55,7 @@ function trans_cap32(num_samp,num_ch)
     %% Pull transient data from channels 53001:53032
     %  Store results in array indexed 1:32  
     clear CHx
-    fprintf('...Pulling Channel Data from D-TACQ ACQ...\n');
+    fprintf('...Pulling Channel Data from D-TACQ ACQ...\n\n');
     for i=1:num_ch
         channel=53000+i;
         disp(i);
@@ -65,7 +67,7 @@ function trans_cap32(num_samp,num_ch)
         fopen(CH);
         
         CHx{i} = fread(CH,num_samp,'int32');
-        
+                
         % If you wish you can save channel data to binary file for posterity
         %filename = sprintf('%s_%02d.bin',UUT,i);
         %f = fopen(filename,'w');
