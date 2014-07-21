@@ -10,7 +10,7 @@ function trans_cap32(num_samp,num_ch)
 %tic
     global UUT %Make base workspace variable visible in function
     disp(UUT)
-    vsf = 20/2^32; % Voltage Scaling Factor
+    vsf = 10/2^32; % Voltage Scaling Factor
     samp_rate = 48000; % Sample rate
     
     ID = tcpip(UUT,4220); % 4220 = System Controller
@@ -93,7 +93,7 @@ function trans_cap32(num_samp,num_ch)
     
     index = 1:num_samp;
     %index = index./samp_rate; %Uncomment this line for seconds on x-axis
-    
+        
     fig1 = figure(1);
     for i=1:num_ch
         plot(index, CHx{i})

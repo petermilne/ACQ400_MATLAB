@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>wavegen.m</title><meta name="generator" content="MATLAB 8.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-06-26"><meta name="DC.source" content="wavegen.m"><style type="text/css">
+      --><title>wavegen.m</title><meta name="generator" content="MATLAB 8.3"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-07-15"><meta name="DC.source" content="wavegen.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -95,8 +95,9 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 <span class="comment">%         shg</span>
     <span class="keyword">end</span>
 
-    ID = tcpip(UUT,4222); <span class="comment">% Assuming AO card in Site 2</span>
-    ID.terminator = 10; <span class="comment">% ASCII carriage return</span>
+    <span class="comment">%ID = tcpip(UUT,4222); % Assuming AO card in Site 2</span>
+    ID = tcpip(UUT,4221); <span class="comment">% Assuming AO card in Site 1</span>
+    ID.terminator = 10; <span class="comment">% ASCII line feed</span>
     ID.InputBufferSize = 100;
     ID.Timeout = 60;
     fopen(ID);
@@ -118,21 +119,8 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
     <span class="comment">%%readback=readback';</span>
     <span class="comment">%%disp(readback)</span>
     fclose(ID);
+    delete(ID);
 <span class="keyword">end</span>
-</pre><pre class="codeoutput">
-Sample output from the card responding to the wavegen command. Data
-here is 32K and 16384 samples in length.
-
-Readback from UUT
-stat:/usr/local/awgdata/ch/ch01 length:32768
-New ChanDef:16384
-stat:/usr/local/awgdata/ch/ch02 length:32768
-New ChanDef:16384
-stat:/usr/local/awgdata/ch/ch03 length:32768
-New ChanDef:16384
-stat:/usr/local/awgdata/ch/ch04 length:32768
-New ChanDef:16384
-
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% wavegen.m
@@ -189,8 +177,9 @@ function wavegen(loop,file1,file2,file3,file4)
 %         shg
     end
     
-    ID = tcpip(UUT,4222); % Assuming AO card in Site 2
-    ID.terminator = 10; % ASCII carriage return
+    %ID = tcpip(UUT,4222); % Assuming AO card in Site 2
+    ID = tcpip(UUT,4221); % Assuming AO card in Site 1
+    ID.terminator = 10; % ASCII line feed
     ID.InputBufferSize = 100;
     ID.Timeout = 60;
     fopen(ID);
@@ -212,6 +201,7 @@ function wavegen(loop,file1,file2,file3,file4)
     %%readback=readback';
     %%disp(readback)
     fclose(ID);
+    delete(ID);
 end
 ##### SOURCE END #####
 --></body></html>
