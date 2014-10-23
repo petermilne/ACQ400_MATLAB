@@ -68,10 +68,11 @@ function wavegen(loop,file1,file2,file3,file4)
     fprintf(ID,command);
     fprintf('\n')
     fprintf('Readback from UUT\n')
-    for i=1:8
-    readback{i} = fscanf(ID);
-    fprintf('%s',readback{i})   
-    end
+    pause(2);
+%     for i=1:8
+%     readback{i} = fscanf(ID);
+%     fprintf('%s',readback{i})   
+%     end
     fprintf('\n')
     %%readback=readback';
     %%disp(readback)
