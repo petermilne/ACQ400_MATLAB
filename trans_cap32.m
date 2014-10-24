@@ -9,6 +9,15 @@
 function trans_cap32(num_samp,num_ch)
 %tic
     global UUT %Make base workspace variable visible in function
+    
+    % Check that Carrier has completed boot
+    done_url = sprintf('http://%s/d-tacq/rc-local-complete',UUT);
+    [done_string,url_status] = urlread(done_url,'Timeout',2);
+    if url_status == 0
+        fprintf(2,'D-TACQ Carrrier is booting! Please wait a moment and try again...\n');
+        return;
+    end
+    
     disp(UUT)
     vsf = 20/2^32; % Voltage Scaling Factor
     samp_rate = 48000; % Sample rate
