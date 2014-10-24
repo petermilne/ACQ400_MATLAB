@@ -8,7 +8,7 @@ function set_gains(gain_array)
     end
     
     for j = gain_array
-        if (j ~= 1) || (j ~= 2) || (j ~= 5) || (j ~= 10)
+        if not( (j == 1) || (j == 2) || (j == 5) || (j == 10) )
             fprintf(2,'Check your array! Unsupported range specified\n');
             return;
         end
@@ -52,6 +52,7 @@ function set_gains(gain_array)
             return;
         end
         
+        fprintf('\nCommands executed on card :\n')
         for i=index
             command = sprintf('gain%i=%d',ch_index(i),gain_array(i));
             disp(command)
@@ -60,6 +61,7 @@ function set_gains(gain_array)
             pause(0.15);
         end
 
+        fprintf('\n')
         fclose(ID);
         delete(ID);
         

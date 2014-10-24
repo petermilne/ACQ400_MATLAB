@@ -46,11 +46,9 @@ function get_gains()
             j = sprintf('CH%02d=%dV ',i,gain_read_array(i));
             new_gain_readback = horzcat(new_gain_readback,j);
         end
-        
-        fprintf('\n');
-        disp(new_gain_readback); % Print out gains to console
-        fprintf('\n');
-        
+
+        fprintf('\n%s\n\n',new_gain_readback);  % Print out gains to console
+
         fclose(ID);
         delete(ID);
         
