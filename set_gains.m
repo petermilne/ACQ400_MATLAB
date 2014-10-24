@@ -58,7 +58,7 @@ function set_gains(gain_array)
             disp(command)
             fprintf(ID,command); % This sends the command to the card
             fscanf(ID); % Remove new lines printed by gain commands from buffer
-            pause(0.5);
+            pause(0.15);
         end
 
         fprintf('\n')
