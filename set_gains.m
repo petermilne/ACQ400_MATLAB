@@ -16,10 +16,10 @@ function set_gains(gain_array)
     
     %%
     % Translate from 1V,2V,5V,10V to 0,1,2,3
-    gain_array(gain_array == 1) = 0;
-    gain_array(gain_array == 2) = 1;
-    gain_array(gain_array == 5) = 2;
-    gain_array(gain_array == 10) = 3;
+    gain_array(gain_array == 1) = 3;
+    gain_array(gain_array == 2) = 2;
+    gain_array(gain_array == 5) = 1;
+    gain_array(gain_array == 10) = 0;
     
     % Index for gains settings on each card
     ch_index = 1:16;
@@ -58,7 +58,7 @@ function set_gains(gain_array)
             disp(command)
             fprintf(ID,command); % This sends the command to the card
             fscanf(ID); % Remove new lines printed by gain commands from buffer
-            pause(0.15);
+            pause(0.5);
         end
 
         fprintf('\n')

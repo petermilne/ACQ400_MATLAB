@@ -28,6 +28,8 @@ function trans_cap32(num_samp,num_ch)
     ID.Timeout = 60;
     fopen(ID);
     
+    vsf = calc_vsf();
+    
     command = 'shot_complete';
     fprintf(ID,command); % Queries the value of shot_complete on UUT
     pre = fscanf(ID); % Map response of query to 'pre'
@@ -95,9 +97,9 @@ function trans_cap32(num_samp,num_ch)
     % "hold all" OR one plot command
     close all
     hold all
-    
+        
     for i=1:num_ch
-    CHx{i} = CHx{i}.*vsf; % Scale to volts
+        CHx{i} = CHx{i}.*vsf(i); % Scale to volts
     end
     
     index = 1:num_samp;
