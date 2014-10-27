@@ -6,7 +6,7 @@
 %
 % Arguments to the function are number of samples, |num_samp| and number of channels, |num_ch|.
 % The maximum number of samples which can be pulled is *100,000*.
-function trans_cap32(num_samp,pre,num_ch)
+function trans_cap32(num_samp,pre,num_ch,trig)
 %tic
     global UUT %Make base workspace variable visible in function
     
@@ -34,12 +34,17 @@ function trans_cap32(num_samp,pre,num_ch)
     fprintf(ID,command); % Queries the value of shot_complete on UUT
     shotc_before = fscanf(ID); % Map response of query to 'pre'
     shotc_before = str2double(shotc_before);
-    %disp(pre)
+    %disp(shotc_before)
     
-    trig_source('hard'); % Calls trig_source to setup event trigger
+    if trig == 'hard'
+        trig_source('hard'); % Calls trig_source to setup event trigger
+        command = sprintf('transient PRE=%d POST=%d OSAM=1 SOFT_TRIGGER=1',pre,num_samp);
+    else
+        trig_source('soft'); % Calls trig_source to setup soft trigger
+        command = sprintf('soft_transient %d',num_samp);
+    end
     
-    %command = sprintf('soft_transient %d',num_samp);
-    command = sprintf('transient PRE=%i POST=%d OSAM=1 SOFT_TRIGGER=1',pre,num_samp);
+    %command = sprintf('transient PRE=%i POST=%d OSAM=1 SOFT_TRIGGER=1',pre,num_samp);
     disp(command)
     fprintf(ID,command); % Sets up transient
     
