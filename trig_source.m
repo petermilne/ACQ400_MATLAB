@@ -10,11 +10,12 @@ function trig_source(source)
     if source == 'soft'
         command = 'set.site 1 trg=1,1,1';
     elseif source == 'hard'
-        command = 'set.site 1 trg=1,0,1';
+        %command = 'set.site 1 trg=1,0,1';
+        command = 'set.site 1 event0=1,0,1';
     end
     
     % Send soft_trigger command to UUT.
-    fprintf(ID,command); % This kicks of queued AWG AO command.
+    fprintf(ID,command);
     
     fclose(ID);
     delete(ID);

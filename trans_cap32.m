@@ -6,7 +6,7 @@
 %
 % Arguments to the function are number of samples, |num_samp| and number of channels, |num_ch|.
 % The maximum number of samples which can be pulled is *100,000*.
-function trans_cap32(num_samp,num_ch)
+function trans_cap32(num_samp,pre,num_ch)
 %tic
     global UUT %Make base workspace variable visible in function
     
@@ -32,13 +32,21 @@ function trans_cap32(num_samp,num_ch)
     
     command = 'shot_complete';
     fprintf(ID,command); % Queries the value of shot_complete on UUT
-    pre = fscanf(ID); % Map response of query to 'pre'
-    pre = str2double(pre);
+    shotc_before = fscanf(ID); % Map response of query to 'pre'
+    shotc_before = str2double(shotc_before);
     %disp(pre)
     
-    command = sprintf('soft_transient %d',num_samp);
+    trig_source('hard'); % Calls trig_source to setup event trigger
+    
+    %command = sprintf('soft_transient %d',num_samp);
+    command = sprintf('transient PRE=%i POST=%d OSAM=1 SOFT_TRIGGER=1',pre,num_samp);
     disp(command)
-    fprintf(ID,command); % Sets up soft_transient
+    fprintf(ID,command); % Sets up transient
+    
+    command = sprintf('set_arm');
+    disp(command)
+    fprintf(ID,command); % Arms transient
+    
     readback = fscanf(ID);
     fprintf('%s',readback);
     
@@ -50,11 +58,11 @@ function trans_cap32(num_samp,num_ch)
     fprintf('\n...Running Transient Capture ...\n');
     while true
         fprintf(ID,command);
-        post = fscanf(ID);
-        post = str2double(post);
+        shotc_after = fscanf(ID);
+        shotc_after = str2double(shotc_after);
         %disp(post)
         
-        if (post > pre)
+        if (shotc_after > shotc_before)
             fprintf('\n...Transient Capture Complete...\n\n');
             break
         end
