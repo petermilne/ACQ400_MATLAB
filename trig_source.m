@@ -7,10 +7,16 @@ function trig_source(source)
     ID.Timeout = 60;
     fopen(ID);
     
-    if source == 'soft'
+    if strcmp(source,'soft') == 1
+        command = 'set.site 1 event0=0,0,0';
+        fprintf(ID,command);
         command = 'set.site 1 trg=1,1,1';
-    elseif source == 'hard'
+    elseif strcmp(source,'hard') == 1
         %command = 'set.site 1 trg=1,0,1';
+        command = 'set.site 1 event0=0,0,0';
+        fprintf(ID,command);
+        command = 'set.site 1 trg=1,0,1';
+    elseif strcmp(source,'event') == 1
         command = 'set.site 1 event0=1,0,1';
     end
     

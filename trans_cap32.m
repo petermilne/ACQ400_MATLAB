@@ -36,11 +36,14 @@ function trans_cap32(num_samp,pre,num_ch,trig)
     shotc_before = str2double(shotc_before);
     %disp(shotc_before)
     
-    if trig == 'hard'
-        trig_source('hard'); % Calls trig_source to setup event trigger
+    if strcmp(trig,'event') == 1
+        trig_source('event'); % Calls trig_source to setup event trigger
         command = sprintf('transient PRE=%d POST=%d OSAM=1 SOFT_TRIGGER=1',pre,num_samp);
-    else
+    elseif strcmp(trig,'soft') == 1
         trig_source('soft'); % Calls trig_source to setup soft trigger
+        command = sprintf('soft_transient %d',num_samp);
+    elseif strcmp(trig,'hard') == 1
+        trig_source('hard'); % Calls trig_source to setup hard trigger
         command = sprintf('soft_transient %d',num_samp);
     end
     
