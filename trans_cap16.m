@@ -6,9 +6,18 @@
 %
 % Arguments to the function are number of samples, |num_samp| and number of channels, |num_ch|.
 % The maximum number of samples which can be pulled is *100,000*.
-function trans_cap16(num_samp,num_ch)
+function trans_cap16(num_samp,pre,num_ch,trig)
 %tic
     global UUT %Make base workspace variable visible in function
+    
+    % Check that Carrier has completed boot
+    done_url = sprintf('http://%s/d-tacq/rc-local-complete',UUT);
+    [done_string,url_status] = urlread(done_url,'Timeout',2);
+    if url_status == 0
+        fprintf(2,'D-TACQ Carrrier is booting! Please wait a moment and try again...\n');
+        return;
+    end
+    
     disp(UUT)
     vsf = 20/2^16; % Voltage Scaling Factor
     samp_rate = 48000; % Sample rate
@@ -19,15 +28,34 @@ function trans_cap16(num_samp,num_ch)
     ID.Timeout = 60;
     fopen(ID);
     
+    %vsf = calc_vsf();
+    vsf(1:num_ch) = vsf;
+    
     command = 'shot_complete';
     fprintf(ID,command); % Queries the value of shot_complete on UUT
-    pre = fscanf(ID); % Map response of query to 'pre'
-    pre = str2double(pre);
-    %disp(pre)
+    shotc_before = fscanf(ID); % Map response of query to 'pre'
+    shotc_before = str2double(shotc_before);
+    %disp(shotc_before)
     
-    command = sprintf('soft_transient %d',num_samp);
+    if strcmp(trig,'event') == 1
+        trig_source('event'); % Calls trig_source to setup event trigger
+        command = sprintf('transient PRE=%d POST=%d OSAM=1 SOFT_TRIGGER=1',pre,num_samp);
+    elseif strcmp(trig,'soft') == 1
+        trig_source('soft'); % Calls trig_source to setup soft trigger
+        command = sprintf('soft_transient %d',num_samp);
+    elseif strcmp(trig,'hard') == 1
+        trig_source('hard'); % Calls trig_source to setup hard trigger
+        command = sprintf('soft_transient %d',num_samp);
+    end
+    
+    %command = sprintf('transient PRE=%i POST=%d OSAM=1 SOFT_TRIGGER=1',pre,num_samp);
     disp(command)
-    fprintf(ID,command); % Sets up soft_transient
+    fprintf(ID,command); % Sets up transient
+    
+    command = sprintf('set_arm');
+    disp(command)
+    fprintf(ID,command); % Arms transient
+    
     readback = fscanf(ID);
     fprintf('%s',readback);
     
@@ -39,11 +67,11 @@ function trans_cap16(num_samp,num_ch)
     fprintf('\n...Running Transient Capture ...\n');
     while true
         fprintf(ID,command);
-        post = fscanf(ID);
-        post = str2double(post);
+        shotc_after = fscanf(ID);
+        shotc_after = str2double(shotc_after);
         %disp(post)
         
-        if (post > pre)
+        if (shotc_after > shotc_before)
             fprintf('\n...Transient Capture Complete...\n\n');
             break
         end
@@ -55,7 +83,7 @@ function trans_cap16(num_samp,num_ch)
     %% Pull transient data from channels 53001:53032
     %  Store results in array indexed 1:32  
     clear CHx
-    fprintf('...Pulling Channel Data from D-TACQ ACQ...\n');
+    fprintf('...Pulling Channel Data from D-TACQ ACQ...\n\n');
     for i=1:num_ch
         channel=53000+i;
         disp(i);
@@ -67,11 +95,11 @@ function trans_cap16(num_samp,num_ch)
         fopen(CH);
         
         CHx{i} = fread(CH,num_samp,'int16');
-        
+                
         % If you wish you can save channel data to binary file for posterity
         %filename = sprintf('%s_%02d.bin',UUT,i);
         %f = fopen(filename,'w');
-        %fwrite(f,CHx{i},'int32',0,'b');
+        %fwrite(f,CHx{i},'int16',0,'b');
         %fclose(f);
         
         fclose(CH);
@@ -86,14 +114,14 @@ function trans_cap16(num_samp,num_ch)
     % "hold all" OR one plot command
     close all
     hold all
-    
+        
     for i=1:num_ch
-    CHx{i} = CHx{i}.*vsf; % Scale to volts
+        CHx{i} = CHx{i}.*vsf(i); % Scale to volts
     end
     
     index = 1:num_samp;
     %index = index./samp_rate; %Uncomment this line for seconds on x-axis
-    
+        
     fig1 = figure(1);
     for i=1:num_ch
         plot(index, CHx{i})
