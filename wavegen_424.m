@@ -55,19 +55,28 @@ function wavegen(loop,file1,file2,file3,file4)
     %ID = tcpip(UUT,4226); % Assuming AO card in Site 2
     ID = tcpip(UUT,4222); % Assuming AO card in Site 1
     ID.terminator = 10; % ASCII line feed
-    ID.InputBufferSize = 400;
+    ID.InputBufferSize = 100;
     ID.Timeout = 60;
     fopen(ID);
     
-    command = 'wavegen --loop 1 ';
-    for i=1:32
-        channels = sprintf('%d=ch%02d ',i,i);
-        command = horzcat(command,channels);
-    end
+    command = 'playloop_length=0';
+    fprintf(ID,command);
+    
+    command = 'wavegen --loop 1 1:32=ch%02d';
+%     for i=1:32
+%         channels = sprintf('%d=ch%02d ',i,i);
+%         command = horzcat(command,channels);
+%     end
 
     %disp(command)
     
     fprintf(ID,command);
+    fprintf('\n')
+    
+    readback = fscanf(ID);
+    disp('ping')
+    disp(readback)
+    disp('pong')
     fprintf('\n')
 
     fclose(ID);

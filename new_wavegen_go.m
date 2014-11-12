@@ -4,6 +4,8 @@
 % given in their respective documentation pages.
 function wavegen_go(CH_data)
     new_write_to_ALL_CH(CH_data);
+    pause(0.5)
     wavegen_424(1);
+    pause(0.5)
     soft_trigger
 end
