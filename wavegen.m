@@ -52,8 +52,8 @@ function wavegen(loop,file1,file2,file3,file4)
 %         shg
     end
     
-    ID = tcpip(UUT,4226); % Assuming AO card in Site 2
-    %ID = tcpip(UUT,4221); % Assuming AO card in Site 1
+    %ID = tcpip(UUT,4226); % Assuming AO card in Site 2
+    ID = tcpip(UUT,4222); % Assuming AO card in Site 1
     ID.terminator = 10; % ASCII line feed
     ID.InputBufferSize = 100;
     ID.Timeout = 60;
