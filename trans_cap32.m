@@ -28,7 +28,7 @@ function trans_cap32(num_samp,pre,num_ch,trig)
     ID.Timeout = 60;
     fopen(ID);
     
-    vsf = calc_vsf();
+    vsf = calc_vsf(1,num_ch);
     
     command = 'shot_complete';
     fprintf(ID,command); % Queries the value of shot_complete on UUT
