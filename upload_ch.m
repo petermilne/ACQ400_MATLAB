@@ -4,7 +4,7 @@
 % CH   : channel number 1..32
 % Based on provided channel number and data opens the relevant TCP/IP port
 % and uploads the data . 
-function write_to_CH(data,CH)
+function uload_ch(data,CH)
     global UUT %Make base workspace variable visible in function
     
     channel=54000+CH; % 54001:54004 = CH1 thru CH4 data for AO
