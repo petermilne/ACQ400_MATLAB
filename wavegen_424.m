@@ -13,10 +13,10 @@
 % to use the trigger on starting an adjacent ADC module
 %
 
-function wavegen(site,nchan,loop,soft_trigger)
+function wavegen(site,nchan,loop,_soft_trigger)
     global UUT %Make base workspace variable visible in function
  
-    if nargin < 4; soft_trigger = 0; end;
+    if nargin < 4; _soft_trigger = 0; end;
     if nargin < 3; loop = 0; end
     if nargin < 2; nchan = 32; end;
     if nargin < 1; site = 1; end;
@@ -35,5 +35,5 @@ function wavegen(site,nchan,loop,soft_trigger)
     fclose(ID);
     delete(ID);
 
-    if (soft_trigger); soft_trigger(); end
+    if (_soft_trigger); soft_trigger(); end
 end
