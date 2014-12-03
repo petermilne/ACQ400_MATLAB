@@ -16,10 +16,10 @@
 function wavegen_424(site,nchan,loop,s_trig)
     global UUT %Make base workspace variable visible in function
  
-    if nargin < 4; s_trig = 0; end;
-    if nargin < 3; loop = 0; end
-    if nargin < 2; nchan = 32; end;
     if nargin < 1; site = 1; end;
+    if nargin < 2; nchan = 32; end;
+    if nargin < 3; loop = 0; end
+    if nargin < 4; s_trig = 0; end;
     
     ID = tcpip(UUT,4220+site); % Assuming AO card in Site 1
     ID.terminator = 10; % ASCII line feed
