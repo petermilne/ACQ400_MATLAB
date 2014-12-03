@@ -7,7 +7,7 @@
 function upload_ch(data,CH)
     global UUT %Make base workspace variable visible in function
     
-    channel=54000+CH; % 54001:54004 = CH1 thru CH4 data for AO
+    channel=54000+CH; % 54001:54032 = CH1 thru CH32 data for AO
     ID = tcpip(UUT,channel);
     set(ID,'ByteOrder','littleEndian'); % Set link endianness
     ID.terminator = 10; % ASCII line feed
