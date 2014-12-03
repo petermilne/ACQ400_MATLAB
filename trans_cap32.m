@@ -108,6 +108,7 @@ function trans_cap32(num_samp,pre,num_ch,trig)
     whos CHx
     fprintf('\n...Data Transfer Complete...\n\n');
     save('CHx.mat','CHx') % Save MATLAB variable for retrieval in Base Workspace
+    assignin('base', 'CHx', CHx); % Save variable to Base Workspace
     
     %% Plot all 32CH on a graph and enable plotting controls
     % "hold all" OR one plot command
