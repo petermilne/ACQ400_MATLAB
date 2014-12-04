@@ -4,7 +4,8 @@
 % site : 1..6
 % freq : sample rate in Hz
 %
-function wavegen_424_setInternalClockTrg(site,hz)
+% Edit with trigger option
+function wavegen_424_setInternalClockTrg(site,hz,s_trig)
     global UUT %Make base workspace variable visible in function
  
     if nargin < 1; site = 1; end;
@@ -19,8 +20,13 @@ function wavegen_424_setInternalClockTrg(site,hz)
     ID.Timeout = 60;
     fopen(ID);
     
-    % soft trigger
-    fprintf(ID, 'trg=1,1,1');
+    if (s_trig)
+        % soft trigger
+        fprintf(ID, 'trg=1,1,1');
+    else
+        % hardware trigger
+        fprintf(ID, 'trg=1,0,1');
+    end
    
     % internal clock 
     fprintf(ID, 'clk=0,0,0');
