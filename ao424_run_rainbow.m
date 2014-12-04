@@ -1,9 +1,9 @@
 %% ao424_run_rainbow.m
 % Turnkey AO424 wavegen implementation
 %
-function ao424_run_rainbow(site,hz)
+function ao424_run_rainbow(site,hz,s_trig)
     
-    wavegen_424_setInternalClockTrg(site, hz)
+    wavegen_424_setInternalClockTrg(site, hz, s_trig)
     
     % Create rainbow and upload
     offset = -30082; t=1:16384;
@@ -14,6 +14,6 @@ function ao424_run_rainbow(site,hz)
     end
     
     % Load and go ..
-    wavegen_424(site, 32, 1, 1)
+    wavegen_424(site, 32, 1, s_trig)
      
 end
