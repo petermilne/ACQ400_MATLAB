@@ -10,11 +10,23 @@ function set_sample_rate(site,rate)
     ID.Timeout = 60;
     fopen(ID);
     
-    % Something to catch unsupported clock rates
+    % Catch unsupported clock rates
+    if rate < 10 || rate > 128000
+        fprintf(2,'Unsupported sample rate! Sample rate must be between X and Y...\n\n');
+        return;
+    end
     
     % Send command to UUT.
     command = sprintf('ACQ43X_SAMPLE_RATE=%d',rate);
     fprintf(ID,command);
+    
+    % Readback new value
+    fprintf(ID,'ACQ43X_SAMPLE_RATE');
+    readback = fscanf(ID); % Pop empty line
+    readback = fscanf(ID);
+    readback(length(readback)) = ''; % Pop the new line off the end of string
+    readback = sprintf('\nNew sample rate = %s Hz\n',readback);
+    disp(readback)
     
     fclose(ID);
     delete(ID);

@@ -1,74 +1,75 @@
 %% trans_cap32.m
 % This function allows the user to grab a fixed length of 32-bit data from the UUT.
 %
-% A |soft_transient| command is sent to the System Controller (Port 4220). Once the value of
-% shot_complete increments by one, data is ready to be pulled from Ports 53001:53032.
+% A transient command is sent to the System Controller (Port 4220). Once the value of
+% shot_complete increments by one, data is ready to be pulled from Ports 53001:530XX.
 %
-% Arguments to the function are number of samples, |num_samp| and number of channels, |num_ch|.
+% Arguments to the function are as follows :
+%
+% <html>
+% <table border=1><tr>
+%     <td>     Argument      </td><td>  Description                                                                                                              </td></tr><tr>
+%     <td><b>  num_samp  </b></td><td>  Number of samples                                                                                                        </td></tr><tr>
+%     <td><b>  pre       </b></td><td>  For use with pre/post EVENT mode. Number of samples to record prior to trigger                                           </td></tr><tr>
+%     <td><b>  ch_mask   </b></td><td>  Channel mask. This can be a scalar or vector.                                                                            </td></tr><tr>
+%     <td>     -             </td><td>  SCALAR : capture will record channels corresponding to 1:ch_mask                                                         </td></tr><tr>
+%     <td>     -             </td><td>  VECTOR : capture will record channels specified in mask, e.g. [1,2,5,10] will record channels CH01,CH02,CH05 &amp; CH10  </td></tr><tr>
+%     <td><b>  trig      </b></td><td>  Trigger source. Select from 'soft', 'hard' or 'event'.                                                                   </td></tr><tr>
+%     <td>     -             </td><td>  soft - Internal software trigger                                                                                         </td></tr><tr>
+%     <td>     -             </td><td>  hard - External hardware trigger                                                                                         </td></tr><tr>
+%     <td>     -             </td><td>  event - External hardware trigger with support for pre/post capture                                                      </td></tr><tr>
+%     <td><b>  rate      </b></td><td>  Sampling rate in Hz. The program will warn the user if this is outside supported clock limits                            </td></tr></table>
+% </html>
+%
 % The maximum number of samples which can be pulled is *100,000*.
-function trans_cap32(num_samp,pre,num_ch,trig)
+%
+function trans_cap32(num_samp,pre,ch_mask,trig,rate)
 %tic
     global UUT %Make base workspace variable visible in function
     
     % Check that Carrier has completed boot
-    done_url = sprintf('http://%s/d-tacq/rc-local-complete',UUT);
-    [done_string,url_status] = urlread(done_url,'Timeout',2);
-    if url_status == 0
-        fprintf(2,'D-TACQ Carrrier is booting! Please wait a moment and try again...\n');
-        return;
-    end
+    boot_complete();
     
     disp(UUT)
-    vsf = 20/2^32; % Voltage Scaling Factor
-    samp_rate = 48000; % Sample rate
+    set_sample_rate(1,rate); % Set up sampling rate
+    vsf = calc_vsf(0); % Voltage Scaling Factor : 0=variable gain, 1=fixed gain
     
+    %% Special option for contiguous 1:ch_mask channels
+    if length(ch_mask) == 1
+        ch_mask = [1:ch_mask];
+    end
+    
+    
+    %% Configure port and open
     ID = tcpip(UUT,4220); % 4220 = System Controller
     ID.terminator = 10; % ASCII line feed
     ID.InputBufferSize = 100;
     ID.Timeout = 60;
     fopen(ID);
     
-    vsf = calc_vsf(1,num_ch);
     
+    %% Query the value of shot_complete on UUT
     command = 'shot_complete';
-    fprintf(ID,command); % Queries the value of shot_complete on UUT
-    shotc_before = fscanf(ID); % Map response of query to 'pre'
+    fprintf(ID,command);
+    shotc_before = fscanf(ID); % Map response of query to 'shotc_before'
     shotc_before = str2double(shotc_before);
     %disp(shotc_before)
     
-    if strcmp(trig,'event') == 1
-        trig_source('event'); % Calls trig_source to setup event trigger
-        command = sprintf('transient PRE=%d POST=%d OSAM=1 SOFT_TRIGGER=1',pre,num_samp);
-    elseif strcmp(trig,'soft') == 1
-        trig_source('soft'); % Calls trig_source to setup soft trigger
-        command = sprintf('soft_transient %d',num_samp);
-    elseif strcmp(trig,'hard') == 1
-        trig_source('hard'); % Calls trig_source to setup hard trigger
-        command = sprintf('soft_transient %d',num_samp);
-    end
     
-    %command = sprintf('transient PRE=%i POST=%d OSAM=1 SOFT_TRIGGER=1',pre,num_samp);
-    disp(command)
-    fprintf(ID,command); % Sets up transient
-    
-    command = sprintf('set_arm');
-    disp(command)
-    fprintf(ID,command); % Arms transient
-    
-    readback = fscanf(ID);
-    fprintf('%s',readback);
+    %% Set up trigger source, request transient and arm
+    transient_commands(1,trig,num_samp,pre);
     
 
     %% Poll shot_complete
-    %  Map result to POST. When it increments, and POST is
-    %  one greater than PRE loop breaks.
+    %  Map result to shotc_after. When it increments, and shotc_after is
+    %  one greater than shotc_before loop breaks.
     command = 'shot_complete';
     fprintf('\n...Running Transient Capture ...\n');
     while true
         fprintf(ID,command);
         shotc_after = fscanf(ID);
         shotc_after = str2double(shotc_after);
-        %disp(post)
+        %disp(shotc_after)
         
         if (shotc_after > shotc_before)
             fprintf('\n...Transient Capture Complete...\n\n');
@@ -79,11 +80,12 @@ function trans_cap32(num_samp,pre,num_ch,trig)
     fclose(ID);
     delete(ID);
     
-    %% Pull transient data from channels 53001:53032
-    %  Store results in array indexed 1:32  
+    
+    %% Pull transient data from channels 53001:530XX
+    %  Store results in cell array indexed 1:XX  
     clear CHx
     fprintf('...Pulling Channel Data from D-TACQ ACQ...\n\n');
-    for i=1:num_ch
+    for i=ch_mask
         channel=53000+i;
         disp(i);
         CH = tcpip(UUT,channel);
@@ -110,12 +112,11 @@ function trans_cap32(num_samp,pre,num_ch,trig)
     save('CHx.mat','CHx') % Save MATLAB variable for retrieval in Base Workspace
     assignin('base', 'CHx', CHx); % Save variable to Base Workspace
     
-    %% Plot all 32CH on a graph and enable plotting controls
+    %% Plot in a figure and enable plotting controls
     % "hold all" OR one plot command
-    close all
-    hold all
+    close all; hold all
         
-    for i=1:num_ch
+    for i=ch_mask
         CHx{i} = CHx{i}.*vsf(i); % Scale to volts
     end
     
@@ -123,15 +124,19 @@ function trans_cap32(num_samp,pre,num_ch,trig)
     %index = index./samp_rate; %Uncomment this line for seconds on x-axis
         
     fig1 = figure(1);
-    for i=1:num_ch
-        plot(index, CHx{i})
+    
+    for i=ch_mask
+        plot(index, CHx{i}) % Plot channel
+        label_array{i} = sprintf('CH%02d',i); % Record labels for figure legend
     end
+    
+    label_array = label_array(~cellfun('isempty',label_array)); % Remove empty elements from cell array
     
     %title('Transient Capture') 
     xlabel('Samples');
     %xlabel('Seconds');
     ylabel('Volts');
-    %legend('sig1','sig2')
+    legend(label_array);
     hold off
     set(fig1,'units','normalized','outerposition',[0 0 1 1]); % MATLABs best approximation of maximising figure window.
     shg

@@ -1,9 +1,23 @@
 function set_gains(gain_array)
     global UUT %Make base workspace variable visible in function
     
+    ID = tcpip(UUT,4220);
+    ID.terminator = 10; % ASCII line feed
+    ID.InputBufferSize = 100;
+    ID.Timeout = 60;
+    fopen(ID);
+    
+    fprintf(ID,'NCHAN'); % Query number of channels
+    num_ch = str2num(fscanf(ID));
+    num_sites = num_ch/16; % Derive number of sites from num_ch
+    
+    sites = [4221,4222,4223,4224,4225,4226]; % For the full 96 channel system
+    active_sites = sites(1:num_sites); % Select how many sites are active
+    
     %% Error checking
-    if length(gain_array) ~= 16 % This can be extended for 96 channels
-        fprintf(2,'Array is not 16 channels long!\n');
+    if length(gain_array) ~= num_ch
+        err_msg = sprintf('Array is not %d channels long!\n',num_ch);
+        fprintf(2,err_msg);
         return;
     end
     
@@ -26,16 +40,16 @@ function set_gains(gain_array)
     ch_index = horzcat(ch_index,ch_index,ch_index,ch_index,ch_index,ch_index);
     
     %% Write commands to card
-    %for site  = [4221,4222,4223,4224,4225,4226] % For the full 96 channel system
-    for site  = [4221]
+    fprintf('\nProgramming gains...\n')
+    for current_site = active_sites
     
-        ID = tcpip(UUT,site);
+        ID = tcpip(UUT,current_site);
         ID.terminator = 10; % ASCII line feed
         ID.InputBufferSize = 100;
         ID.Timeout = 60;
         fopen(ID);
 
-        switch site
+        switch current_site
         case 4221
             index = 1:16;
         case 4222
@@ -52,10 +66,10 @@ function set_gains(gain_array)
             return;
         end
         
-        fprintf('\nCommands executed on card :\n')
+        
         for i=index
             command = sprintf('gain%i=%d',ch_index(i),gain_array(i));
-            disp(command)
+            %disp(command)
             fprintf(ID,command); % This sends the command to the card
             fscanf(ID); % Remove new lines printed by gain commands from buffer
             pause(0.15);
@@ -66,4 +80,7 @@ function set_gains(gain_array)
         delete(ID);
         
     end
+    
+    fprintf('\nProgramming gains completed...\n\n')
+    
 end
