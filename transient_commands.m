@@ -3,6 +3,18 @@
 % Based on this the command to begin transient capture is created and sent
 % to the acquisition card.
 % Finally the transient capture is armed ready for trigger.
+%
+% <html>
+% <table border=1><tr>
+%     <td>     Argument      </td><td>  Description                                                                                                              </td></tr><tr>
+%     <td><b>  site      </b></td><td>  Site to send commands to.                                                                                                </td></tr><tr>
+%     <td><b>  trig      </b></td><td>  Trigger source. Select from 'soft', 'hard' or 'event'.                                                                   </td></tr><tr>
+%     <td>     -             </td><td>  soft - Internal software trigger                                                                                         </td></tr><tr>
+%     <td>     -             </td><td>  hard - External hardware trigger                                                                                         </td></tr><tr>
+%     <td>     -             </td><td>  event - External hardware trigger with support for pre/post capture                                                      </td></tr><tr>
+%     <td><b>  pre       </b></td><td>  For use with pre/post EVENT mode. Number of samples to record prior to trigger. Should be zero if not in EVENT mode.     </td></tr><tr></table>
+% </html>
+
 function transient_commands(site, trig, num_samp, pre)
     global UUT %Make base workspace variable visible in function
     

@@ -1,6 +1,6 @@
 %% boot_complete
 % This function tests if the D-TACQ carrier has completed its boot sequence
-% by monitoring an file on the card via http.
+% by monitoring a file on the card via http.
 function boot_complete()
     global UUT %Make base workspace variable visible in function
     

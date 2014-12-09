@@ -1,5 +1,6 @@
 function gain_values = get_gains()
     global UUT %Make base workspace variable visible in function
+    ch_per_site = 16;
     
     ID = tcpip(UUT,4220);
     ID.terminator = 10; % ASCII line feed
@@ -9,8 +10,9 @@ function gain_values = get_gains()
     
     fprintf(ID,'NCHAN'); % Query number of channels
     num_ch = str2num(fscanf(ID));
-    num_sites = num_ch/16; % Derive number of sites from num_ch
-    gain_string_array = [];
+    num_sites = num_ch/ch_per_site; % Derive number of sites from num_ch
+    gain_string_array = []; % Clear
+    gain_printout_final = []; % Clear
     
     sites = [4221,4222,4223,4224,4225,4226]; % For the full 96 channel system
     active_sites = sites(1:num_sites); % Select how many sites are active
@@ -39,23 +41,23 @@ function gain_values = get_gains()
         
         switch current_site
         case 4221
-            index = 1:16;
+            index = 1:ch_per_site;
         case 4222
-            index = 17:32;
+            index = ch_per_site+1:2*ch_per_site;
         case 4223
-            index = 33:48;
+            index = 2*ch_per_site+1:3*ch_per_site;
         case 4224
-            index = 49:64;
+            index = 3*ch_per_site+1:4*ch_per_site;
         case 4225
-            index = 65:80;
+            index = 4*ch_per_site+1:5*ch_per_site;
         case 4226
-            index = 81:96;
+            index = 5*ch_per_site+1:6*ch_per_site;
         otherwise
             return;
         end
         
         % Index for gains settings on each card
-        ch_index = 1:16;
+        ch_index = 1:ch_per_site;
         ch_index = horzcat(ch_index,ch_index,ch_index,ch_index,ch_index,ch_index);
         
         gain_string_array = []; % Clear
@@ -66,14 +68,18 @@ function gain_values = get_gains()
             gain_string_array = horzcat(gain_string_array,printout);
         end
         
-        gain_printout{current_site - 4220,:} = gain_string_array; % Add into accumulating row of cell array
+        current_site_natural = current_site - 4220; % Reduce sites to natural 1 to 6 range
+        
+        gain_printout{current_site_natural,:} = gain_string_array; % Add into accumulating row of cell array
+        gain_printout_final = strcat(gain_printout_final,gain_printout{current_site_natural,:},'\n'); % Concatenate onto final string for user feedback
 
         fclose(ID);
         delete(ID);
         
     end
     
-    gain_printout_final = sprintf('%s\n%s\n',gain_printout{1,:},gain_printout{2,:});
+    fprintf('Gains :\n')
     fprintf(gain_printout_final)
+    fprintf('\n')
     
 end

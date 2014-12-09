@@ -1,0 +1,180 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>transient_commands.m</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-12-09"><meta name="DC.source" content="transient_commands.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>transient_commands.m</h1><p>This function sets up the trigger source for a transient capture. Based on this the command to begin transient capture is created and sent to the acquisition card. Finally the transient capture is armed ready for trigger.</p><p>
+<table border=1><tr>
+    <td>     Argument      </td><td>  Description                                                                                                              </td></tr><tr>
+    <td><b>  site      </b></td><td>  Site to send commands to.                                                                                                </td></tr><tr>
+    <td><b>  trig      </b></td><td>  Trigger source. Select from 'soft', 'hard' or 'event'.                                                                   </td></tr><tr>
+    <td>     -             </td><td>  soft - Internal software trigger                                                                                         </td></tr><tr>
+    <td>     -             </td><td>  hard - External hardware trigger                                                                                         </td></tr><tr>
+    <td>     -             </td><td>  event - External hardware trigger with support for pre/post capture                                                      </td></tr><tr>
+    <td><b>  pre       </b></td><td>  For use with pre/post EVENT mode. Number of samples to record prior to trigger. Should be zero if not in EVENT mode.     </td></tr><tr></table>
+</p><pre class="codeinput"><span class="keyword">function</span> transient_commands(site, trig, num_samp, pre)
+    <span class="keyword">global</span> UUT <span class="comment">%Make base workspace variable visible in function</span>
+
+    ID = tcpip(UUT,4220); <span class="comment">% 4220 = System Controller</span>
+    ID.terminator = 10; <span class="comment">% ASCII line feed</span>
+    ID.InputBufferSize = 100;
+    ID.Timeout = 60;
+    fopen(ID);
+
+    <span class="keyword">if</span> strcmp(trig,<span class="string">'soft'</span>) == 1
+        clear_event = sprintf(<span class="string">'set.site %d event0=0,0,0'</span>,site); <span class="comment">% Clear event config</span>
+        fprintf(ID,clear_event);
+        trig_command = sprintf(<span class="string">'set.site %d trg=1,1,1'</span>,site);
+        transient_command = sprintf(<span class="string">'soft_transient %d'</span>,num_samp);
+
+    <span class="keyword">elseif</span> strcmp(trig,<span class="string">'hard'</span>) == 1
+        clear_event = sprintf(<span class="string">'set.site %d event0=0,0,0'</span>,site); <span class="comment">% Clear event config</span>
+        fprintf(ID,clear_event);
+        trig_command = sprintf(<span class="string">'set.site %d trg=1,0,1'</span>,site);
+        transient_command = sprintf(<span class="string">'soft_transient %d'</span>,num_samp);
+
+    <span class="keyword">elseif</span> strcmp(trig,<span class="string">'event'</span>) == 1
+        trig_command = sprintf(<span class="string">'set.site %d event0=1,0,1'</span>,site);
+        transient_command = sprintf(<span class="string">'transient PRE=%d POST=%d OSAM=1 SOFT_TRIGGER=1'</span>,pre,num_samp);
+    <span class="keyword">end</span>
+
+    disp(trig_command)
+    fprintf(ID,trig_command); <span class="comment">% Send trigger config command to UUT.</span>
+
+    disp(transient_command)
+    fprintf(ID,transient_command); <span class="comment">% Sets up transient</span>
+
+    disp(<span class="string">'set_arm'</span>)
+    fprintf(ID,<span class="string">'set_arm'</span>); <span class="comment">% Arms transient, wait for trigger</span>
+
+    readback = fscanf(ID);
+    fprintf(<span class="string">'%s'</span>,readback);
+
+    fclose(ID);
+    delete(ID);
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% transient_commands.m
+% This function sets up the trigger source for a transient capture.
+% Based on this the command to begin transient capture is created and sent
+% to the acquisition card.
+% Finally the transient capture is armed ready for trigger.
+%
+% <html>
+% <table border=1><tr>
+%     <td>     Argument      </td><td>  Description                                                                                                              </td></tr><tr>
+%     <td><b>  site      </b></td><td>  Site to send commands to.                                                                                                </td></tr><tr>
+%     <td><b>  trig      </b></td><td>  Trigger source. Select from 'soft', 'hard' or 'event'.                                                                   </td></tr><tr>
+%     <td>     -             </td><td>  soft - Internal software trigger                                                                                         </td></tr><tr>
+%     <td>     -             </td><td>  hard - External hardware trigger                                                                                         </td></tr><tr>
+%     <td>     -             </td><td>  event - External hardware trigger with support for pre/post capture                                                      </td></tr><tr>
+%     <td><b>  pre       </b></td><td>  For use with pre/post EVENT mode. Number of samples to record prior to trigger. Should be zero if not in EVENT mode.     </td></tr><tr></table>
+% </html>
+
+function transient_commands(site, trig, num_samp, pre)
+    global UUT %Make base workspace variable visible in function
+    
+    ID = tcpip(UUT,4220); % 4220 = System Controller
+    ID.terminator = 10; % ASCII line feed
+    ID.InputBufferSize = 100;
+    ID.Timeout = 60;
+    fopen(ID);
+    
+    if strcmp(trig,'soft') == 1
+        clear_event = sprintf('set.site %d event0=0,0,0',site); % Clear event config
+        fprintf(ID,clear_event);
+        trig_command = sprintf('set.site %d trg=1,1,1',site);
+        transient_command = sprintf('soft_transient %d',num_samp);
+        
+    elseif strcmp(trig,'hard') == 1
+        clear_event = sprintf('set.site %d event0=0,0,0',site); % Clear event config
+        fprintf(ID,clear_event);
+        trig_command = sprintf('set.site %d trg=1,0,1',site);
+        transient_command = sprintf('soft_transient %d',num_samp);
+        
+    elseif strcmp(trig,'event') == 1
+        trig_command = sprintf('set.site %d event0=1,0,1',site);
+        transient_command = sprintf('transient PRE=%d POST=%d OSAM=1 SOFT_TRIGGER=1',pre,num_samp);
+    end
+    
+    disp(trig_command)
+    fprintf(ID,trig_command); % Send trigger config command to UUT.
+    
+    disp(transient_command)
+    fprintf(ID,transient_command); % Sets up transient
+    
+    disp('set_arm')
+    fprintf(ID,'set_arm'); % Arms transient, wait for trigger
+    
+    readback = fscanf(ID);
+    fprintf('%s',readback);
+    
+    fclose(ID);
+    delete(ID);
+end
+##### SOURCE END #####
+--></body></html>

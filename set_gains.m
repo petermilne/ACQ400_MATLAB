@@ -1,5 +1,6 @@
 function set_gains(gain_array)
     global UUT %Make base workspace variable visible in function
+    ch_per_site = 16;
     
     ID = tcpip(UUT,4220);
     ID.terminator = 10; % ASCII line feed
@@ -9,7 +10,7 @@ function set_gains(gain_array)
     
     fprintf(ID,'NCHAN'); % Query number of channels
     num_ch = str2num(fscanf(ID));
-    num_sites = num_ch/16; % Derive number of sites from num_ch
+    num_sites = num_ch/ch_per_site; % Derive number of sites from num_ch
     
     sites = [4221,4222,4223,4224,4225,4226]; % For the full 96 channel system
     active_sites = sites(1:num_sites); % Select how many sites are active
@@ -36,7 +37,7 @@ function set_gains(gain_array)
     gain_array(gain_array == 10) = 0;
     
     % Index for gains settings on each card
-    ch_index = 1:16;
+    ch_index = 1:ch_per_site;
     ch_index = horzcat(ch_index,ch_index,ch_index,ch_index,ch_index,ch_index);
     
     %% Write commands to card
@@ -51,17 +52,17 @@ function set_gains(gain_array)
 
         switch current_site
         case 4221
-            index = 1:16;
+            index = 1:ch_per_site;
         case 4222
-            index = 17:32;
+            index = ch_per_site+1:2*ch_per_site;
         case 4223
-            index = 33:48;
+            index = 2*ch_per_site+1:3*ch_per_site;
         case 4224
-            index = 49:64;
+            index = 3*ch_per_site+1:4*ch_per_site;
         case 4225
-            index = 65:80;
+            index = 4*ch_per_site+1:5*ch_per_site;
         case 4226
-            index = 81:96;
+            index = 5*ch_per_site+1:6*ch_per_site;
         otherwise
             return;
         end

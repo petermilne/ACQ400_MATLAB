@@ -1,5 +1,5 @@
-%% trans_cap32.m
-% This function allows the user to grab a fixed length of 32-bit data from the UUT.
+%% trans_cap.m
+% This function allows the user to grab a fixed length of data from the UUT.
 %
 % A transient command is sent to the System Controller (Port 4220). Once the value of
 % shot_complete increments by one, data is ready to be pulled from Ports 53001:530XX.
@@ -9,8 +9,9 @@
 % <html>
 % <table border=1><tr>
 %     <td>     Argument      </td><td>  Description                                                                                                              </td></tr><tr>
+%     <td><b>  card      </b></td><td>  Type of D-TACQ acquistition card in system. 'acq435', 'acq437', 'acq420', 'acq425'                                       </td></tr><tr>
 %     <td><b>  num_samp  </b></td><td>  Number of samples                                                                                                        </td></tr><tr>
-%     <td><b>  pre       </b></td><td>  For use with pre/post EVENT mode. Number of samples to record prior to trigger                                           </td></tr><tr>
+%     <td><b>  pre       </b></td><td>  For use with pre/post EVENT mode. Number of samples to record prior to trigger. Should be zero if not in EVENT mode.     </td></tr><tr>
 %     <td><b>  ch_mask   </b></td><td>  Channel mask. This can be a scalar or vector.                                                                            </td></tr><tr>
 %     <td>     -             </td><td>  SCALAR : capture will record channels corresponding to 1:ch_mask                                                         </td></tr><tr>
 %     <td>     -             </td><td>  VECTOR : capture will record channels specified in mask, e.g. [1,2,5,10] will record channels CH01,CH02,CH05 &amp; CH10  </td></tr><tr>
@@ -22,8 +23,8 @@
 % </html>
 %
 % The maximum number of samples which can be pulled is *100,000*.
-%
-function trans_cap32(num_samp,pre,ch_mask,trig,rate)
+%%
+function trans_cap(card,num_samp,pre,ch_mask,trig,rate)
 %tic
     global UUT %Make base workspace variable visible in function
     
@@ -32,7 +33,8 @@ function trans_cap32(num_samp,pre,ch_mask,trig,rate)
     
     disp(UUT)
     set_sample_rate(1,rate); % Set up sampling rate
-    vsf = calc_vsf(0); % Voltage Scaling Factor : 0=variable gain, 1=fixed gain
+    resolution = get_res(card);
+    vsf = calc_vsf(); % Voltage Scaling Factor
     
     %% Special option for contiguous 1:ch_mask channels
     if length(ch_mask) == 1
@@ -64,7 +66,7 @@ function trans_cap32(num_samp,pre,ch_mask,trig,rate)
     %  Map result to shotc_after. When it increments, and shotc_after is
     %  one greater than shotc_before loop breaks.
     command = 'shot_complete';
-    fprintf('\n...Running Transient Capture ...\n');
+    fprintf('...Running Transient Capture ...\n');
     while true
         fprintf(ID,command);
         shotc_after = fscanf(ID);
@@ -91,16 +93,28 @@ function trans_cap32(num_samp,pre,ch_mask,trig,rate)
         CH = tcpip(UUT,channel);
         set(CH,'ByteOrder','littleEndian'); % Set link endianness
         CH.terminator = 10; % ASCII carriage returns
-        CH.InputBufferSize = num_samp*32; % num_samp * 32 bits
+        if resolution == 32
+            CH.InputBufferSize = num_samp*32; % num_samp * 32 bits
+        elseif resolution == 16
+            CH.InputBufferSize = num_samp*16; % num_samp * 16 bits
+        end
         CH.Timeout = 60;
         fopen(CH);
         
-        CHx{i} = fread(CH,num_samp,'int32');
+        if resolution == 32
+            CHx{i} = fread(CH,num_samp,'int32');
+        elseif resolution == 16
+            CHx{i} = fread(CH,num_samp,'int16');
+        end
                 
         % If you wish you can save channel data to binary file for posterity
         %filename = sprintf('%s_%02d.bin',UUT,i);
         %f = fopen(filename,'w');
-        %fwrite(f,CHx{i},'int32',0,'b');
+        %if resolution == 32
+        %    fwrite(f,CHx{i},'int32',0,'b');
+        %elseif resolution == 16
+        %    fwrite(f,CHx{i},'int16',0,'b');
+        %end
         %fclose(f);
         
         fclose(CH);
