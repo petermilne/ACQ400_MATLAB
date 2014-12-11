@@ -22,19 +22,21 @@
 %     <td><b>  rate      </b></td><td>  Sampling rate in Hz. The program will warn the user if this is outside supported clock limits                            </td></tr></table>
 % </html>
 %
-% The maximum number of samples which can be pulled is *100,000*.
+% The maximum number of samples which can be pulled is *512MB / NCHAN / 4*. MATLAB is not very efficient for transients aprroaching this maximum.
+%
 %%
 function trans_cap(card,num_samp,pre,ch_mask,trig,rate)
 %tic
     global UUT %Make base workspace variable visible in function
     
     % Check that Carrier has completed boot
-    boot_complete();
+    result = boot_complete();
+    if result == 0; return; end;
     
     disp(UUT)
     set_sample_rate(1,rate); % Set up sampling rate
-    resolution = get_res(card);
-    vsf = calc_vsf(); % Voltage Scaling Factor
+    [resolution,variable_gain] = get_res(card);
+    vsf = calc_vsf(resolution,variable_gain); % Voltage Scaling Factor
     
     %% Special option for contiguous 1:ch_mask channels
     if length(ch_mask) == 1

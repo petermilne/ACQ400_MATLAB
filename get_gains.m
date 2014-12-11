@@ -1,6 +1,11 @@
 function gain_values = get_gains()
+
     global UUT %Make base workspace variable visible in function
+    gains_modified = evalin('base','gains_modified');
+    gains_modified = 0;
     ch_per_site = 16;
+    
+    fprintf('...Fetching Gains...\n\n')
     
     ID = tcpip(UUT,4220);
     ID.terminator = 10; % ASCII line feed
@@ -18,7 +23,7 @@ function gain_values = get_gains()
     active_sites = sites(1:num_sites); % Select how many sites are active
     
     for current_site = active_sites
-    
+        
         ID = tcpip(UUT,current_site);
         ID.terminator = 10; % ASCII line feed
         ID.InputBufferSize = 100;
@@ -81,5 +86,6 @@ function gain_values = get_gains()
     fprintf('Gains :\n')
     fprintf(gain_printout_final)
     fprintf('\n')
-    
+    assignin('base', 'gains_modified', gains_modified);
+
 end

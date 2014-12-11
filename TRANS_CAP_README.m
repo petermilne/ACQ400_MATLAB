@@ -20,7 +20,7 @@ UUT = '10.12.196.103'; % IP address of YOUR product, this is just an example.
 % With DNS
 UUT = 'acq2006_014';
 %%%
-% * From here call the |trans_cap| or function with arguments.
+% * From here call the <trans_cap.html |trans_cap|> function with arguments.
 %
 %%
 %  >> trans_cap('acq437',10000,0,16,'hard',128000)
@@ -81,9 +81,8 @@ UUT = 'acq2006_014';
 %  ...Data Transfer Complete...
 
 %%%
-% * Now through an oscilloscope or acquisition software we can see those generated 
-% signals output on the UUT. In this case x1 thru x4 are sine waves offset
-% by 45 degrees.
+% * The data is saved to the workspace as a cell array named |CHx|.
+% * A plot is produced of the captured data. An example is shown below.
 %
 % <<AWG.gif>>
 %

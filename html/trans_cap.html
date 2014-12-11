@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>trans_cap.m</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-12-09"><meta name="DC.source" content="trans_cap.m"><style type="text/css">
+      --><title>trans_cap.m</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-12-10"><meta name="DC.source" content="trans_cap.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,7 +66,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>trans_cap.m</h1><!--introduction--><p>This function allows the user to grab a fixed length of 32-bit data from the UUT.</p><p>A transient command is sent to the System Controller (Port 4220). Once the value of shot_complete increments by one, data is ready to be pulled from Ports 53001:530XX.</p><p>Arguments to the function are as follows :</p><p>
+  </style></head><body><div class="content"><h1>trans_cap.m</h1><!--introduction--><p>This function allows the user to grab a fixed length of data from the UUT.</p><p>A transient command is sent to the System Controller (Port 4220). Once the value of shot_complete increments by one, data is ready to be pulled from Ports 53001:530XX.</p><p>Arguments to the function are as follows :</p><p>
 <table border=1><tr>
     <td>     Argument      </td><td>  Description                                                                                                              </td></tr><tr>
     <td><b>  card      </b></td><td>  Type of D-TACQ acquistition card in system. 'acq435', 'acq437', 'acq420', 'acq425'                                       </td></tr><tr>
@@ -80,19 +80,18 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
     <td>     -             </td><td>  hard - External hardware trigger                                                                                         </td></tr><tr>
     <td>     -             </td><td>  event - External hardware trigger with support for pre/post capture                                                      </td></tr><tr>
     <td><b>  rate      </b></td><td>  Sampling rate in Hz. The program will warn the user if this is outside supported clock limits                            </td></tr></table>
-</p><p>The maximum number of samples which can be pulled is <b>100,000</b>.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#3">Special option for contiguous 1:ch_mask channels</a></li><li><a href="#4">Configure port and open</a></li><li><a href="#5">Query the value of shot_complete on UUT</a></li><li><a href="#6">Set up trigger source, request transient and arm</a></li><li><a href="#7">Poll shot_complete</a></li><li><a href="#8">Pull transient data from channels 53001:530XX</a></li><li><a href="#9">Plot in a figure and enable plotting controls</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> trans_cap(card,num_samp,pre,ch_mask,trig,rate)
+</p><p>The maximum number of samples which can be pulled is <b>512MB / NCHAN / 4</b>. MATLAB is not very efficient for transients aprroaching this maximum.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#3">Special option for contiguous 1:ch_mask channels</a></li><li><a href="#4">Configure port and open</a></li><li><a href="#5">Query the value of shot_complete on UUT</a></li><li><a href="#6">Set up trigger source, request transient and arm</a></li><li><a href="#7">Poll shot_complete</a></li><li><a href="#8">Pull transient data from channels 53001:530XX</a></li><li><a href="#9">Plot in a figure and enable plotting controls</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> trans_cap(card,num_samp,pre,ch_mask,trig,rate)
 </pre><pre class="codeinput"><span class="comment">%tic</span>
     <span class="keyword">global</span> UUT <span class="comment">%Make base workspace variable visible in function</span>
 
     <span class="comment">% Check that Carrier has completed boot</span>
-    boot_complete();
+    result = boot_complete();
+    <span class="keyword">if</span> result == 0; <span class="keyword">return</span>; <span class="keyword">end</span>;
 
     disp(UUT)
     set_sample_rate(1,rate); <span class="comment">% Set up sampling rate</span>
+    resolution = get_res(card);
     vsf = calc_vsf(); <span class="comment">% Voltage Scaling Factor</span>
-</pre><pre class="codeoutput">acq2006_014
-</pre><pre class="codeoutput error">Error using trans_cap (line 35)
-Not enough input arguments.
 </pre><h2>Special option for contiguous 1:ch_mask channels<a name="3"></a></h2><pre class="codeinput">    <span class="keyword">if</span> length(ch_mask) == 1
         ch_mask = [1:ch_mask];
     <span class="keyword">end</span>
@@ -132,24 +131,28 @@ one greater than shotc_before loop breaks.</pre><pre class="codeinput">    comma
         CH = tcpip(UUT,channel);
         set(CH,<span class="string">'ByteOrder'</span>,<span class="string">'littleEndian'</span>); <span class="comment">% Set link endianness</span>
         CH.terminator = 10; <span class="comment">% ASCII carriage returns</span>
-        <span class="keyword">if</span> strcmp(card,<span class="string">'acq435'</span>) || strcmp(card,<span class="string">'acq437'</span>)
+        <span class="keyword">if</span> resolution == 32
             CH.InputBufferSize = num_samp*32; <span class="comment">% num_samp * 32 bits</span>
-        <span class="keyword">elseif</span> strcmp(card,<span class="string">'acq420'</span>) || strcmp(card,<span class="string">'acq425'</span>)
+        <span class="keyword">elseif</span> resolution == 16
             CH.InputBufferSize = num_samp*16; <span class="comment">% num_samp * 16 bits</span>
         <span class="keyword">end</span>
         CH.Timeout = 60;
         fopen(CH);
 
-        <span class="keyword">if</span> strcmp(card,<span class="string">'acq435'</span>) || strcmp(card,<span class="string">'acq437'</span>)
+        <span class="keyword">if</span> resolution == 32
             CHx{i} = fread(CH,num_samp,<span class="string">'int32'</span>);
-        <span class="keyword">elseif</span> strcmp(card,<span class="string">'acq420'</span>) || strcmp(card,<span class="string">'acq425'</span>)
+        <span class="keyword">elseif</span> resolution == 16
             CHx{i} = fread(CH,num_samp,<span class="string">'int16'</span>);
         <span class="keyword">end</span>
 
         <span class="comment">% If you wish you can save channel data to binary file for posterity</span>
         <span class="comment">%filename = sprintf('%s_%02d.bin',UUT,i);</span>
         <span class="comment">%f = fopen(filename,'w');</span>
-        <span class="comment">%fwrite(f,CHx{i},'int32',0,'b');</span>
+        <span class="comment">%if resolution == 32</span>
+        <span class="comment">%    fwrite(f,CHx{i},'int32',0,'b');</span>
+        <span class="comment">%elseif resolution == 16</span>
+        <span class="comment">%    fwrite(f,CHx{i},'int16',0,'b');</span>
+        <span class="comment">%end</span>
         <span class="comment">%fclose(f);</span>
 
         fclose(CH);
@@ -191,7 +194,7 @@ one greater than shotc_before loop breaks.</pre><pre class="codeinput">    comma
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% trans_cap.m
-% This function allows the user to grab a fixed length of 32-bit data from the UUT.
+% This function allows the user to grab a fixed length of data from the UUT.
 %
 % A transient command is sent to the System Controller (Port 4220). Once the value of
 % shot_complete increments by one, data is ready to be pulled from Ports 53001:530XX.
@@ -214,17 +217,20 @@ one greater than shotc_before loop breaks.</pre><pre class="codeinput">    comma
 %     <td><b>  rate      </b></td><td>  Sampling rate in Hz. The program will warn the user if this is outside supported clock limits                            </td></tr></table>
 % </html>
 %
-% The maximum number of samples which can be pulled is *100,000*.
+% The maximum number of samples which can be pulled is *512MB / NCHAN / 4*. MATLAB is not very efficient for transients aprroaching this maximum.
+%
 %%
 function trans_cap(card,num_samp,pre,ch_mask,trig,rate)
 %tic
     global UUT %Make base workspace variable visible in function
     
     % Check that Carrier has completed boot
-    boot_complete();
+    result = boot_complete();
+    if result == 0; return; end;
     
     disp(UUT)
     set_sample_rate(1,rate); % Set up sampling rate
+    resolution = get_res(card);
     vsf = calc_vsf(); % Voltage Scaling Factor
     
     %% Special option for contiguous 1:ch_mask channels
@@ -284,24 +290,28 @@ function trans_cap(card,num_samp,pre,ch_mask,trig,rate)
         CH = tcpip(UUT,channel);
         set(CH,'ByteOrder','littleEndian'); % Set link endianness
         CH.terminator = 10; % ASCII carriage returns
-        if strcmp(card,'acq435') || strcmp(card,'acq437')
+        if resolution == 32
             CH.InputBufferSize = num_samp*32; % num_samp * 32 bits
-        elseif strcmp(card,'acq420') || strcmp(card,'acq425')
+        elseif resolution == 16
             CH.InputBufferSize = num_samp*16; % num_samp * 16 bits
         end
         CH.Timeout = 60;
         fopen(CH);
         
-        if strcmp(card,'acq435') || strcmp(card,'acq437')
+        if resolution == 32
             CHx{i} = fread(CH,num_samp,'int32');
-        elseif strcmp(card,'acq420') || strcmp(card,'acq425')
+        elseif resolution == 16
             CHx{i} = fread(CH,num_samp,'int16');
         end
                 
         % If you wish you can save channel data to binary file for posterity
         %filename = sprintf('%s_%02d.bin',UUT,i);
         %f = fopen(filename,'w');
-        %fwrite(f,CHx{i},'int32',0,'b');
+        %if resolution == 32
+        %    fwrite(f,CHx{i},'int32',0,'b');
+        %elseif resolution == 16
+        %    fwrite(f,CHx{i},'int16',0,'b');
+        %end
         %fclose(f);
         
         fclose(CH);

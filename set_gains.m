@@ -1,5 +1,7 @@
 function set_gains(gain_array)
     global UUT %Make base workspace variable visible in function
+    gains_modified = evalin('base','gains_modified');
+    gains_modified = 1;
     ch_per_site = 16;
     
     ID = tcpip(UUT,4220);
@@ -73,15 +75,25 @@ function set_gains(gain_array)
             %disp(command)
             fprintf(ID,command); % This sends the command to the card
             fscanf(ID); % Remove new lines printed by gain commands from buffer
-            pause(0.15);
         end
-
-        fprintf('\n')
-        fclose(ID);
-        delete(ID);
+        
+%         command = ('gx=');
+%         for i=index
+%             command = strcat(command,num2str(gain_array(i)));
+%             %command = sprintf('gain%i=%d',ch_index(i),gain_array(i));
+%         end
+%         
+%         disp(command)
+%         fprintf(ID,command); % This sends the command to the card
+%         fscanf(ID); % Remove new lines printed by gain commands from buffer
+%         
+%         fprintf('\n')
+%         fclose(ID);
+%         delete(ID);
         
     end
     
     fprintf('\nProgramming gains completed...\n\n')
+    assignin('base', 'gains_modified', gains_modified);
     
 end
