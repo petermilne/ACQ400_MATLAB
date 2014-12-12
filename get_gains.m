@@ -1,3 +1,9 @@
+%% get_gains.m
+% Function that queries system for various gain setting present
+% on each channel. Returns an array containing gain settings for
+% all channels in the current system. This information is also printed
+% to the console to aid the user.
+%%
 function gain_values = get_gains()
 
     global UUT %Make base workspace variable visible in function

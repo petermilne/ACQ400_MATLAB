@@ -1,0 +1,278 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>set_gains.m</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-12-12"><meta name="DC.source" content="set_gains.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>set_gains.m</h1><!--introduction--><p>Function that writes gain settings for each channel to system. This is based on an array provided by the operator of format gain_array(1:num_ch).</p><p>
+<table border=1><tr>
+    <td>     Card      </td><td>      Gain Levels                                                                                                              </td></tr><tr>
+    <td><b>  acq437    </b></td><td>  (+/-) </td><td> 1V </td><td> 2V </td><td> 5V </td><td> 10V </td></tr><tr></table>
+</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#3">Error checking</a></li><li><a href="#5">Write commands to card</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> set_gains(gain_array)
+</pre><pre class="codeinput">    <span class="keyword">global</span> UUT <span class="comment">%Make base workspace variable visible in function</span>
+    gains_modified = evalin(<span class="string">'base'</span>,<span class="string">'gains_modified'</span>);
+    gains_modified = 1;
+    ch_per_site = 16;
+
+    ID = tcpip(UUT,4220);
+    ID.terminator = 10; <span class="comment">% ASCII line feed</span>
+    ID.InputBufferSize = 100;
+    ID.Timeout = 60;
+    fopen(ID);
+
+    fprintf(ID,<span class="string">'NCHAN'</span>); <span class="comment">% Query number of channels</span>
+    num_ch = str2num(fscanf(ID));
+    num_sites = num_ch/ch_per_site; <span class="comment">% Derive number of sites from num_ch</span>
+
+    sites = [4221,4222,4223,4224,4225,4226]; <span class="comment">% For the full 96 channel system</span>
+    active_sites = sites(1:num_sites); <span class="comment">% Select how many sites are active</span>
+</pre><h2>Error checking<a name="3"></a></h2><pre class="codeinput">    <span class="keyword">if</span> length(gain_array) ~= num_ch
+        err_msg = sprintf(<span class="string">'Array is not %d channels long!\n'</span>,num_ch);
+        fprintf(2,err_msg);
+        <span class="keyword">return</span>;
+    <span class="keyword">end</span>
+
+    <span class="keyword">for</span> j = gain_array
+        <span class="keyword">if</span> not( (j == 1) || (j == 2) || (j == 5) || (j == 10) )
+            fprintf(2,<span class="string">'Check your array! Unsupported range specified\n'</span>);
+            <span class="keyword">return</span>;
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+</pre><p>Translate from 1V,2V,5V,10V to 0,1,2,3</p><pre class="codeinput">    gain_array(gain_array == 1) = 3;
+    gain_array(gain_array == 2) = 2;
+    gain_array(gain_array == 5) = 1;
+    gain_array(gain_array == 10) = 0;
+
+    <span class="comment">% Index for gains settings on each card</span>
+    ch_index = 1:ch_per_site;
+    ch_index = horzcat(ch_index,ch_index,ch_index,ch_index,ch_index,ch_index);
+</pre><h2>Write commands to card<a name="5"></a></h2><pre class="codeinput">    fprintf(<span class="string">'\nProgramming gains...\n'</span>)
+    <span class="keyword">for</span> current_site = active_sites
+
+        ID = tcpip(UUT,current_site);
+        ID.terminator = 10; <span class="comment">% ASCII line feed</span>
+        ID.InputBufferSize = 100;
+        ID.Timeout = 60;
+        fopen(ID);
+
+        <span class="keyword">switch</span> current_site
+        <span class="keyword">case</span> 4221
+            index = 1:ch_per_site;
+        <span class="keyword">case</span> 4222
+            index = ch_per_site+1:2*ch_per_site;
+        <span class="keyword">case</span> 4223
+            index = 2*ch_per_site+1:3*ch_per_site;
+        <span class="keyword">case</span> 4224
+            index = 3*ch_per_site+1:4*ch_per_site;
+        <span class="keyword">case</span> 4225
+            index = 4*ch_per_site+1:5*ch_per_site;
+        <span class="keyword">case</span> 4226
+            index = 5*ch_per_site+1:6*ch_per_site;
+        <span class="keyword">otherwise</span>
+            <span class="keyword">return</span>;
+        <span class="keyword">end</span>
+
+
+        <span class="keyword">for</span> i=index
+            command = sprintf(<span class="string">'gain%i=%d'</span>,ch_index(i),gain_array(i));
+            <span class="comment">%disp(command)</span>
+            fprintf(ID,command); <span class="comment">% This sends the command to the card</span>
+            fscanf(ID); <span class="comment">% Remove new lines printed by gain commands from buffer</span>
+        <span class="keyword">end</span>
+
+<span class="comment">%         command = ('gx=');</span>
+<span class="comment">%         for i=index</span>
+<span class="comment">%             command = strcat(command,num2str(gain_array(i)));</span>
+<span class="comment">%             %command = sprintf('gain%i=%d',ch_index(i),gain_array(i));</span>
+<span class="comment">%         end</span>
+<span class="comment">%</span>
+<span class="comment">%         disp(command)</span>
+<span class="comment">%         fprintf(ID,command); % This sends the command to the card</span>
+<span class="comment">%         fscanf(ID); % Remove new lines printed by gain commands from buffer</span>
+<span class="comment">%</span>
+<span class="comment">%         fprintf('\n')</span>
+<span class="comment">%         fclose(ID);</span>
+<span class="comment">%         delete(ID);</span>
+
+    <span class="keyword">end</span>
+
+    fprintf(<span class="string">'\nProgramming gains completed...\n\n'</span>)
+    assignin(<span class="string">'base'</span>, <span class="string">'gains_modified'</span>, gains_modified);
+</pre><pre class="codeinput"><span class="keyword">end</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% set_gains.m
+% Function that writes gain settings for each channel to system. This is
+% based on an array provided by the operator of format
+% gain_array(1:num_ch).
+%
+% <html>
+% <table border=1><tr>
+%     <td>     Card      </td><td>      Gain Levels                                                                                                              </td></tr><tr>
+%     <td><b>  acq437    </b></td><td>  (+/-) </td><td> 1V </td><td> 2V </td><td> 5V </td><td> 10V </td></tr><tr></table>
+% </html>
+%
+%%
+function set_gains(gain_array)
+    global UUT %Make base workspace variable visible in function
+    gains_modified = evalin('base','gains_modified');
+    gains_modified = 1;
+    ch_per_site = 16;
+    
+    ID = tcpip(UUT,4220);
+    ID.terminator = 10; % ASCII line feed
+    ID.InputBufferSize = 100;
+    ID.Timeout = 60;
+    fopen(ID);
+    
+    fprintf(ID,'NCHAN'); % Query number of channels
+    num_ch = str2num(fscanf(ID));
+    num_sites = num_ch/ch_per_site; % Derive number of sites from num_ch
+    
+    sites = [4221,4222,4223,4224,4225,4226]; % For the full 96 channel system
+    active_sites = sites(1:num_sites); % Select how many sites are active
+    
+    %% Error checking
+    if length(gain_array) ~= num_ch
+        err_msg = sprintf('Array is not %d channels long!\n',num_ch);
+        fprintf(2,err_msg);
+        return;
+    end
+    
+    for j = gain_array
+        if not( (j == 1) || (j == 2) || (j == 5) || (j == 10) )
+            fprintf(2,'Check your array! Unsupported range specified\n');
+            return;
+        end
+    end
+    
+    %%
+    % Translate from 1V,2V,5V,10V to 0,1,2,3
+    gain_array(gain_array == 1) = 3;
+    gain_array(gain_array == 2) = 2;
+    gain_array(gain_array == 5) = 1;
+    gain_array(gain_array == 10) = 0;
+    
+    % Index for gains settings on each card
+    ch_index = 1:ch_per_site;
+    ch_index = horzcat(ch_index,ch_index,ch_index,ch_index,ch_index,ch_index);
+    
+    %% Write commands to card
+    fprintf('\nProgramming gains...\n')
+    for current_site = active_sites
+    
+        ID = tcpip(UUT,current_site);
+        ID.terminator = 10; % ASCII line feed
+        ID.InputBufferSize = 100;
+        ID.Timeout = 60;
+        fopen(ID);
+
+        switch current_site
+        case 4221
+            index = 1:ch_per_site;
+        case 4222
+            index = ch_per_site+1:2*ch_per_site;
+        case 4223
+            index = 2*ch_per_site+1:3*ch_per_site;
+        case 4224
+            index = 3*ch_per_site+1:4*ch_per_site;
+        case 4225
+            index = 4*ch_per_site+1:5*ch_per_site;
+        case 4226
+            index = 5*ch_per_site+1:6*ch_per_site;
+        otherwise
+            return;
+        end
+        
+        
+        for i=index
+            command = sprintf('gain%i=%d',ch_index(i),gain_array(i));
+            %disp(command)
+            fprintf(ID,command); % This sends the command to the card
+            fscanf(ID); % Remove new lines printed by gain commands from buffer
+        end
+        
+%         command = ('gx=');
+%         for i=index
+%             command = strcat(command,num2str(gain_array(i)));
+%             %command = sprintf('gain%i=%d',ch_index(i),gain_array(i));
+%         end
+%         
+%         disp(command)
+%         fprintf(ID,command); % This sends the command to the card
+%         fscanf(ID); % Remove new lines printed by gain commands from buffer
+%         
+%         fprintf('\n')
+%         fclose(ID);
+%         delete(ID);
+        
+    end
+    
+    fprintf('\nProgramming gains completed...\n\n')
+    assignin('base', 'gains_modified', gains_modified);
+    
+end
+##### SOURCE END #####
+--></body></html>

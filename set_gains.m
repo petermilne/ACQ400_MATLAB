@@ -1,3 +1,15 @@
+%% set_gains.m
+% Function that writes gain settings for each channel to system. This is
+% based on an array provided by the operator of format
+% gain_array(1:num_ch).
+%
+% <html>
+% <table border=1><tr>
+%     <td>     Card      </td><td>      Gain Levels                                                                                                              </td></tr><tr>
+%     <td><b>  acq437    </b></td><td>  (+/-) </td><td> 1V </td><td> 2V </td><td> 5V </td><td> 10V </td></tr><tr></table>
+% </html>
+%
+%%
 function set_gains(gain_array)
     global UUT %Make base workspace variable visible in function
     gains_modified = evalin('base','gains_modified');

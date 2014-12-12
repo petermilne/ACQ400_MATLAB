@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>boot_complete</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-12-12"><meta name="DC.source" content="boot_complete.m"><style type="text/css">
+      --><title>get_res.m</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-12-12"><meta name="DC.source" content="get_res.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,40 +66,37 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>boot_complete</h1><!--introduction--><p>This function tests if the D-TACQ carrier has completed its boot sequence by monitoring a file on the card via http.</p><!--/introduction--><pre class="codeinput"><span class="keyword">function</span> result = boot_complete()
-    <span class="keyword">global</span> UUT <span class="comment">%Make base workspace variable visible in function</span>
-
-    done_url = sprintf(<span class="string">'http://%s/d-tacq/rc-local-complete'</span>,UUT);
-    [done_string,url_status] = urlread(done_url,<span class="string">'Timeout'</span>,2);
-    <span class="keyword">if</span> url_status == 0
-        fprintf(2,<span class="string">'D-TACQ Carrrier is booting! Please wait a moment and try again...\n'</span>);
-        result = 0;
-        <span class="comment">%return;</span>
-    <span class="keyword">else</span>
-        result = 1;
+  </style></head><body><div class="content"><h1>get_res.m</h1><!--introduction--><p>Simple function to set the resolution and variable gain state of captured data based on D-TACQ acquisition card in system.</p><!--/introduction--><pre class="codeinput"><span class="keyword">function</span> [resolution,variable_gain] = get_res(card)
+    <span class="keyword">if</span> strcmp(card,<span class="string">'acq435'</span>) || strcmp(card,<span class="string">'acq437'</span>)
+        resolution = 32;
+    <span class="keyword">elseif</span> strcmp(card,<span class="string">'acq420'</span>) || strcmp(card,<span class="string">'acq425'</span>)
+        resolution = 16;
     <span class="keyword">end</span>
 
+    <span class="keyword">if</span> strcmp(card,<span class="string">'acq425'</span>) || strcmp(card,<span class="string">'acq437'</span>)
+        variable_gain = 1;
+    <span class="keyword">else</span>
+        variable_gain = 0;
+    <span class="keyword">end</span>
 <span class="keyword">end</span>
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
-%% boot_complete
-% This function tests if the D-TACQ carrier has completed its boot sequence
-% by monitoring a file on the card via http.
+%% get_res.m
+% Simple function to set the resolution and variable gain state 
+% of captured data based on D-TACQ acquisition card in system.
 %%
-function result = boot_complete()
-    global UUT %Make base workspace variable visible in function
-    
-    done_url = sprintf('http://%s/d-tacq/rc-local-complete',UUT);
-    [done_string,url_status] = urlread(done_url,'Timeout',2);
-    if url_status == 0
-        fprintf(2,'D-TACQ Carrrier is booting! Please wait a moment and try again...\n');
-        result = 0;
-        %return;
-    else
-        result = 1;
+function [resolution,variable_gain] = get_res(card)
+    if strcmp(card,'acq435') || strcmp(card,'acq437')
+        resolution = 32;
+    elseif strcmp(card,'acq420') || strcmp(card,'acq425')
+        resolution = 16;
     end
     
+    if strcmp(card,'acq425') || strcmp(card,'acq437')
+        variable_gain = 1;
+    else
+        variable_gain = 0;
+    end
 end
-
 ##### SOURCE END #####
 --></body></html>

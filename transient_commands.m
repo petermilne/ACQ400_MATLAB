@@ -1,6 +1,6 @@
 %% transient_commands.m
 % This function sets up the trigger source for a transient capture.
-% Based on this the command to begin transient capture is created and sent
+% Based on this, the command to begin transient capture is created and sent
 % to the acquisition card.
 % Finally the transient capture is armed ready for trigger.
 %
@@ -12,6 +12,7 @@
 %     <td>     -             </td><td>  soft - Internal software trigger                                                                                         </td></tr><tr>
 %     <td>     -             </td><td>  hard - External hardware trigger                                                                                         </td></tr><tr>
 %     <td>     -             </td><td>  event - External hardware trigger with support for pre/post capture                                                      </td></tr><tr>
+%     <td><b>  num_samp  </b></td><td>  Number of samples                                                                                                        </td></tr><tr>
 %     <td><b>  pre       </b></td><td>  For use with pre/post EVENT mode. Number of samples to record prior to trigger. Should be zero if not in EVENT mode.     </td></tr><tr></table>
 % </html>
 

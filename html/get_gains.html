@@ -1,0 +1,260 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>get_gains.m</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-12-12"><meta name="DC.source" content="get_gains.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>get_gains.m</h1><!--introduction--><p>Function that queries system for various gain setting present on each channel. Returns an array containing gain settings for all channels in the current system. This information is also printed to the console to aid the user.</p><!--/introduction--><pre class="codeinput"><span class="keyword">function</span> gain_values = get_gains()
+
+    <span class="keyword">global</span> UUT <span class="comment">%Make base workspace variable visible in function</span>
+    gains_modified = evalin(<span class="string">'base'</span>,<span class="string">'gains_modified'</span>);
+    gains_modified = 0;
+    ch_per_site = 16;
+
+    fprintf(<span class="string">'...Fetching Gains...\n\n'</span>)
+
+    ID = tcpip(UUT,4220);
+    ID.terminator = 10; <span class="comment">% ASCII line feed</span>
+    ID.InputBufferSize = 100;
+    ID.Timeout = 60;
+    fopen(ID);
+
+    fprintf(ID,<span class="string">'NCHAN'</span>); <span class="comment">% Query number of channels</span>
+    num_ch = str2num(fscanf(ID));
+    num_sites = num_ch/ch_per_site; <span class="comment">% Derive number of sites from num_ch</span>
+    gain_string_array = []; <span class="comment">% Clear</span>
+    gain_printout_final = []; <span class="comment">% Clear</span>
+
+    sites = [4221,4222,4223,4224,4225,4226]; <span class="comment">% For the full 96 channel system</span>
+    active_sites = sites(1:num_sites); <span class="comment">% Select how many sites are active</span>
+
+    <span class="keyword">for</span> current_site = active_sites
+
+        ID = tcpip(UUT,current_site);
+        ID.terminator = 10; <span class="comment">% ASCII line feed</span>
+        ID.InputBufferSize = 100;
+        ID.Timeout = 60;
+        fopen(ID);
+
+        <span class="comment">% Read back gains from the card to verify</span>
+        command = <span class="string">'gains'</span>;
+        fprintf(ID,command);
+        gain_readback = fscanf(ID);
+
+        gain_readback(length(gain_readback)) = <span class="string">''</span>; <span class="comment">% Pop the new line off the end of string</span>
+        gain_read_array = gain_readback - <span class="string">'0'</span>; <span class="comment">% Convert from 0000 format to [0,0,0,0]</span>
+
+        <span class="comment">% Translate from 0,1,2,3 to 1V,2V,5V,10V</span>
+        gain_read_array(gain_read_array == 0) = 10;
+        gain_read_array(gain_read_array == 1) = 5;
+        gain_read_array(gain_read_array == 2) = 2;
+        gain_read_array(gain_read_array == 3) = 1;
+
+        <span class="keyword">switch</span> current_site
+        <span class="keyword">case</span> 4221
+            index = 1:ch_per_site;
+        <span class="keyword">case</span> 4222
+            index = ch_per_site+1:2*ch_per_site;
+        <span class="keyword">case</span> 4223
+            index = 2*ch_per_site+1:3*ch_per_site;
+        <span class="keyword">case</span> 4224
+            index = 3*ch_per_site+1:4*ch_per_site;
+        <span class="keyword">case</span> 4225
+            index = 4*ch_per_site+1:5*ch_per_site;
+        <span class="keyword">case</span> 4226
+            index = 5*ch_per_site+1:6*ch_per_site;
+        <span class="keyword">otherwise</span>
+            <span class="keyword">return</span>;
+        <span class="keyword">end</span>
+
+        <span class="comment">% Index for gains settings on each card</span>
+        ch_index = 1:ch_per_site;
+        ch_index = horzcat(ch_index,ch_index,ch_index,ch_index,ch_index,ch_index);
+
+        gain_string_array = []; <span class="comment">% Clear</span>
+
+        <span class="keyword">for</span> i = index
+            printout = sprintf(<span class="string">'CH%02d=% 3dV '</span>,i,gain_read_array(ch_index(i)));
+            gain_values(i) = gain_read_array(ch_index(i));
+            gain_string_array = horzcat(gain_string_array,printout);
+        <span class="keyword">end</span>
+
+        current_site_natural = current_site - 4220; <span class="comment">% Reduce sites to natural 1 to 6 range</span>
+
+        gain_printout{current_site_natural,:} = gain_string_array; <span class="comment">% Add into accumulating row of cell array</span>
+        gain_printout_final = strcat(gain_printout_final,gain_printout{current_site_natural,:},<span class="string">'\n'</span>); <span class="comment">% Concatenate onto final string for user feedback</span>
+
+        fclose(ID);
+        delete(ID);
+
+    <span class="keyword">end</span>
+
+    fprintf(<span class="string">'Gains :\n'</span>)
+    fprintf(gain_printout_final)
+    fprintf(<span class="string">'\n'</span>)
+    assignin(<span class="string">'base'</span>, <span class="string">'gains_modified'</span>, gains_modified);
+
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% get_gains.m
+% Function that queries system for various gain setting present
+% on each channel. Returns an array containing gain settings for
+% all channels in the current system. This information is also printed
+% to the console to aid the user.
+%%
+function gain_values = get_gains()
+
+    global UUT %Make base workspace variable visible in function
+    gains_modified = evalin('base','gains_modified');
+    gains_modified = 0;
+    ch_per_site = 16;
+    
+    fprintf('...Fetching Gains...\n\n')
+    
+    ID = tcpip(UUT,4220);
+    ID.terminator = 10; % ASCII line feed
+    ID.InputBufferSize = 100;
+    ID.Timeout = 60;
+    fopen(ID);
+    
+    fprintf(ID,'NCHAN'); % Query number of channels
+    num_ch = str2num(fscanf(ID));
+    num_sites = num_ch/ch_per_site; % Derive number of sites from num_ch
+    gain_string_array = []; % Clear
+    gain_printout_final = []; % Clear
+    
+    sites = [4221,4222,4223,4224,4225,4226]; % For the full 96 channel system
+    active_sites = sites(1:num_sites); % Select how many sites are active
+    
+    for current_site = active_sites
+        
+        ID = tcpip(UUT,current_site);
+        ID.terminator = 10; % ASCII line feed
+        ID.InputBufferSize = 100;
+        ID.Timeout = 60;
+        fopen(ID);
+
+        % Read back gains from the card to verify
+        command = 'gains';
+        fprintf(ID,command);
+        gain_readback = fscanf(ID);
+        
+        gain_readback(length(gain_readback)) = ''; % Pop the new line off the end of string
+        gain_read_array = gain_readback - '0'; % Convert from 0000 format to [0,0,0,0]
+                
+        % Translate from 0,1,2,3 to 1V,2V,5V,10V
+        gain_read_array(gain_read_array == 0) = 10;
+        gain_read_array(gain_read_array == 1) = 5;
+        gain_read_array(gain_read_array == 2) = 2;
+        gain_read_array(gain_read_array == 3) = 1;
+        
+        switch current_site
+        case 4221
+            index = 1:ch_per_site;
+        case 4222
+            index = ch_per_site+1:2*ch_per_site;
+        case 4223
+            index = 2*ch_per_site+1:3*ch_per_site;
+        case 4224
+            index = 3*ch_per_site+1:4*ch_per_site;
+        case 4225
+            index = 4*ch_per_site+1:5*ch_per_site;
+        case 4226
+            index = 5*ch_per_site+1:6*ch_per_site;
+        otherwise
+            return;
+        end
+        
+        % Index for gains settings on each card
+        ch_index = 1:ch_per_site;
+        ch_index = horzcat(ch_index,ch_index,ch_index,ch_index,ch_index,ch_index);
+        
+        gain_string_array = []; % Clear
+        
+        for i = index
+            printout = sprintf('CH%02d=% 3dV ',i,gain_read_array(ch_index(i)));
+            gain_values(i) = gain_read_array(ch_index(i));
+            gain_string_array = horzcat(gain_string_array,printout);
+        end
+        
+        current_site_natural = current_site - 4220; % Reduce sites to natural 1 to 6 range
+        
+        gain_printout{current_site_natural,:} = gain_string_array; % Add into accumulating row of cell array
+        gain_printout_final = strcat(gain_printout_final,gain_printout{current_site_natural,:},'\n'); % Concatenate onto final string for user feedback
+
+        fclose(ID);
+        delete(ID);
+        
+    end
+    
+    fprintf('Gains :\n')
+    fprintf(gain_printout_final)
+    fprintf('\n')
+    assignin('base', 'gains_modified', gains_modified);
+
+end
+##### SOURCE END #####
+--></body></html>

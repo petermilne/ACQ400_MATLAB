@@ -1,11 +1,20 @@
 %% calc_vsf.m
-% Function that calculates the various voltage scaling that should be
+% Function that calculates the various voltage scaling factors that should be
 % applied to each channel. Returns an array containing relevant factors for
 % all channels in the current system.
+%
+% <html>
+% <table border=1><tr>
+%     <td>     Argument        </td><td>      Description                                                                                    </td></tr><tr>
+%     <td><b>  resolution      </b></td><td>  Selects 16 or 32-bit word length. This has already been set by a call to get_res.m             </td></tr><tr>
+%     <td><b>  variable_gain   </b></td><td>  Selects whether current system has fixed or variable gains. Also set by call to get_res.m      </td></tr><tr></table>
+% </html>
+
+%%
 function vsf_array = calc_vsf(resolution, variable_gain)
     global UUT %Make base workspace variable visible in function
     
-    %% Load value of gains_modified from Base workspace, if not defined, intialise
+    %% Load value of |gains_modified| from Base workspace, if not defined, intialise
     if not(evalin('base','exist(''gains_modified'',''var'')'))
         assignin('base', 'gains_modified', 1);
     end
@@ -15,7 +24,7 @@ function vsf_array = calc_vsf(resolution, variable_gain)
     %% If card supports variable gains
     if (variable_gain)
     
-        %% If UUT has been modified since last run set gain_modified flag to 1 
+        %% If |UUT| has been modified since last run set gain_modified flag to 1 
         if (evalin('base','exist(''UUT_prev'',''var'')')) % If exists
             UUT_prev = evalin('base','UUT_prev'); % Load previous value from Base workspace
             if not(strcmp(UUT,UUT_prev)) % Compare
@@ -38,6 +47,7 @@ function vsf_array = calc_vsf(resolution, variable_gain)
             vsf_array = evalin('base','vsf_array');
         end
         
+    %% Otherwise query number of channels and use static voltage scaling factor    
     else
         ID = tcpip(UUT,4220);
         ID.terminator = 10; % ASCII line feed
@@ -55,7 +65,7 @@ function vsf_array = calc_vsf(resolution, variable_gain)
     end
 
 
-    %% Save UUT as UUT_prev for comparison on next run
+    %% Save |UUT| as |UUT_prev| for comparison on next run
     assignin('base', 'UUT_prev', UUT); % Save variable to Base Workspace for reuse
     
 end

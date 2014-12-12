@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>calc_vsf.m</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-12-09"><meta name="DC.source" content="calc_vsf.m"><style type="text/css">
+      --><title>calc_vsf.m</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-12-12"><meta name="DC.source" content="calc_vsf.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,31 +66,127 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>calc_vsf.m</h1><p>Function that calculates the various voltage scaling that should be applied to each channel. Returns an array containing relevant factors for all channels in the current system.</p><pre class="codeinput"><span class="keyword">function</span> vsf_array = calc_vsf()
-    <span class="keyword">global</span> UUT <span class="comment">%Make base workspace variable visible in function</span>
-
-    gain_read_array = get_gains(); <span class="comment">% Call to get_gains. Queries current gain values in system.</span>
-
-    <span class="keyword">for</span> i=1:length(gain_read_array)
-        vsf_array(i) = ( gain_read_array(i)*2 )/2^32; <span class="comment">% Converts gains levels into voltage scaling factors</span>
+  </style></head><body><div class="content"><h1>calc_vsf.m</h1><!--introduction--><p>Function that calculates the various voltage scaling factors that should be applied to each channel. Returns an array containing relevant factors for all channels in the current system.</p><p>
+<table border=1><tr>
+    <td>     Argument        </td><td>      Description                                                                                    </td></tr><tr>
+    <td><b>  resolution      </b></td><td>  Selects 16 or 32-bit word length. This has already been set by a call to get_res.m             </td></tr><tr>
+    <td><b>  variable_gain   </b></td><td>  Selects whether current system has fixed or variable gains. Also set by call to get_res.m      </td></tr><tr></table>
+</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#3">Load value of <tt>gains_modified</tt> from Base workspace, if not defined, intialise</a></li><li><a href="#4">If card supports variable gains</a></li><li><a href="#6">If <tt>UUT</tt> has been modified since last run set gain_modified flag to 1</a></li><li><a href="#7">If gains have been modified, read them from card, convert to vsf and save to vsf_array</a></li><li><a href="#8">Otherwise query number of channels and use static voltage scaling factor</a></li><li><a href="#10">Save <tt>UUT</tt> as <tt>UUT_prev</tt> for comparison on next run</a></li></ul></div><pre class="codeinput"><span class="keyword">function</span> vsf_array = calc_vsf(resolution, variable_gain)
+</pre><pre class="codeinput">    <span class="keyword">global</span> UUT <span class="comment">%Make base workspace variable visible in function</span>
+</pre><h2>Load value of <tt>gains_modified</tt> from Base workspace, if not defined, intialise<a name="3"></a></h2><pre class="codeinput">    <span class="keyword">if</span> not(evalin(<span class="string">'base'</span>,<span class="string">'exist(''gains_modified'',''var'')'</span>))
+        assignin(<span class="string">'base'</span>, <span class="string">'gains_modified'</span>, 1);
     <span class="keyword">end</span>
 
-<span class="keyword">end</span>
+    gains_modified = evalin(<span class="string">'base'</span>,<span class="string">'gains_modified'</span>);
+</pre><h2>If card supports variable gains<a name="4"></a></h2><pre class="codeinput">    <span class="keyword">if</span> (variable_gain)
+</pre><h2>If <tt>UUT</tt> has been modified since last run set gain_modified flag to 1<a name="6"></a></h2><pre class="codeinput">        <span class="keyword">if</span> (evalin(<span class="string">'base'</span>,<span class="string">'exist(''UUT_prev'',''var'')'</span>)) <span class="comment">% If exists</span>
+            UUT_prev = evalin(<span class="string">'base'</span>,<span class="string">'UUT_prev'</span>); <span class="comment">% Load previous value from Base workspace</span>
+            <span class="keyword">if</span> not(strcmp(UUT,UUT_prev)) <span class="comment">% Compare</span>
+                gains_modified = 1; <span class="comment">% If modified, set flag HIGH</span>
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+</pre><h2>If gains have been modified, read them from card, convert to vsf and save to vsf_array<a name="7"></a></h2><pre class="codeinput">        <span class="keyword">if</span> gains_modified || not(evalin(<span class="string">'base'</span>,<span class="string">'exist(''vsf_array'',''var'')'</span>)) <span class="comment">% If gains have been altered or are uninitialised</span>
+            gain_read_array = get_gains(); <span class="comment">% Call to get_gains. Queries current gain values in system.</span>
+
+            <span class="keyword">for</span> i=1:length(gain_read_array)
+                vsf_array(i) = ( gain_read_array(i)*2 )/2^resolution; <span class="comment">% Converts gains levels into voltage scaling factors</span>
+            <span class="keyword">end</span>
+
+            assignin(<span class="string">'base'</span>, <span class="string">'vsf_array'</span>, vsf_array); <span class="comment">% Save variable to Base Workspace for reuse</span>
+
+        <span class="keyword">else</span>
+            <span class="comment">%load vsf_array from Base workspace</span>
+            vsf_array = evalin(<span class="string">'base'</span>,<span class="string">'vsf_array'</span>);
+        <span class="keyword">end</span>
+</pre><h2>Otherwise query number of channels and use static voltage scaling factor<a name="8"></a></h2><pre class="codeinput">    <span class="keyword">else</span>
+        ID = tcpip(UUT,4220);
+        ID.terminator = 10; <span class="comment">% ASCII line feed</span>
+        ID.InputBufferSize = 100;
+        ID.Timeout = 60;
+        fopen(ID);
+
+        fprintf(ID,<span class="string">'NCHAN'</span>); <span class="comment">% Query number of channels</span>
+        num_ch = str2num(fscanf(ID));
+
+        fclose(ID);
+        delete(ID);
+
+        vsf_array(1:num_ch) = 20/2^resolution;
+    <span class="keyword">end</span>
+</pre><h2>Save <tt>UUT</tt> as <tt>UUT_prev</tt> for comparison on next run<a name="10"></a></h2><pre class="codeinput">    assignin(<span class="string">'base'</span>, <span class="string">'UUT_prev'</span>, UUT); <span class="comment">% Save variable to Base Workspace for reuse</span>
+</pre><pre class="codeinput"><span class="keyword">end</span>
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2014b</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% calc_vsf.m
-% Function that calculates the various voltage scaling that should be
+% Function that calculates the various voltage scaling factors that should be
 % applied to each channel. Returns an array containing relevant factors for
 % all channels in the current system.
-function vsf_array = calc_vsf()
+%
+% <html>
+% <table border=1><tr>
+%     <td>     Argument        </td><td>      Description                                                                                    </td></tr><tr>
+%     <td><b>  resolution      </b></td><td>  Selects 16 or 32-bit word length. This has already been set by a call to get_res.m             </td></tr><tr>
+%     <td><b>  variable_gain   </b></td><td>  Selects whether current system has fixed or variable gains. Also set by call to get_res.m      </td></tr><tr></table>
+% </html>
+
+%%
+function vsf_array = calc_vsf(resolution, variable_gain)
     global UUT %Make base workspace variable visible in function
     
-    gain_read_array = get_gains(); % Call to get_gains. Queries current gain values in system.
+    %% Load value of |gains_modified| from Base workspace, if not defined, intialise
+    if not(evalin('base','exist(''gains_modified'',''var'')'))
+        assignin('base', 'gains_modified', 1);
+    end
     
-    for i=1:length(gain_read_array)
-        vsf_array(i) = ( gain_read_array(i)*2 )/2^32; % Converts gains levels into voltage scaling factors
+    gains_modified = evalin('base','gains_modified');
+    
+    %% If card supports variable gains
+    if (variable_gain)
+    
+        %% If |UUT| has been modified since last run set gain_modified flag to 1 
+        if (evalin('base','exist(''UUT_prev'',''var'')')) % If exists
+            UUT_prev = evalin('base','UUT_prev'); % Load previous value from Base workspace
+            if not(strcmp(UUT,UUT_prev)) % Compare
+                gains_modified = 1; % If modified, set flag HIGH
+            end
+        end
+    
+        %% If gains have been modified, read them from card, convert to vsf and save to vsf_array
+        if gains_modified || not(evalin('base','exist(''vsf_array'',''var'')')) % If gains have been altered or are uninitialised
+            gain_read_array = get_gains(); % Call to get_gains. Queries current gain values in system.
+    
+            for i=1:length(gain_read_array)
+                vsf_array(i) = ( gain_read_array(i)*2 )/2^resolution; % Converts gains levels into voltage scaling factors
+            end
+    
+            assignin('base', 'vsf_array', vsf_array); % Save variable to Base Workspace for reuse
+    
+        else
+            %load vsf_array from Base workspace
+            vsf_array = evalin('base','vsf_array');
+        end
+        
+    %% Otherwise query number of channels and use static voltage scaling factor    
+    else
+        ID = tcpip(UUT,4220);
+        ID.terminator = 10; % ASCII line feed
+        ID.InputBufferSize = 100;
+        ID.Timeout = 60;
+        fopen(ID);
+    
+        fprintf(ID,'NCHAN'); % Query number of channels
+        num_ch = str2num(fscanf(ID));
+        
+        fclose(ID);
+        delete(ID);
+        
+        vsf_array(1:num_ch) = 20/2^resolution;
     end
 
+
+    %% Save |UUT| as |UUT_prev| for comparison on next run
+    assignin('base', 'UUT_prev', UUT); % Save variable to Base Workspace for reuse
+    
 end
 ##### SOURCE END #####
 --></body></html>

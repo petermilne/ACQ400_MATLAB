@@ -7,7 +7,9 @@
 % tweak the application or create your own custom interface.
 %
 % Click on the hyperlinks in this document to go to detailed views of the
-% constituent functions. The most detailed discussion of the interface to
+% constituent functions. The highest level script, 
+% <trans_cap.html transient_commands.m>, is used to drive 
+% acquisition. The most detailed discussion of the interface to
 % the card is given in <transient_commands.html transient_commands.m>.
 
 
@@ -20,7 +22,7 @@ UUT = '10.12.196.103'; % IP address of YOUR product, this is just an example.
 % With DNS
 UUT = 'acq2006_014';
 %%%
-% * From here call the <trans_cap.html |trans_cap|> function with arguments.
+% * From here call the <trans_cap.html |trans_cap|> function with arguments. Arguments are detailed <trans_cap.html here>.
 %
 %%
 %  >> trans_cap('acq437',10000,0,16,'hard',128000)
@@ -84,14 +86,16 @@ UUT = 'acq2006_014';
 % * The data is saved to the workspace as a cell array named |CHx|.
 % * A plot is produced of the captured data. An example is shown below.
 %
-% <<AWG.gif>>
+% <<trans_cap_img.png>>
 %
 
 %% <trans_cap.html trans_cap.m>
 
 %% <boot_complete.html boot_complete.m>
 
-%% <set_samp_rate.html set_sample_rate.m>
+%% <set_sample_rate.html set_sample_rate.m>
+
+%% <get_res.html get_res.m>
 
 %% <calc_vsf.html calc_vsf.m>
 
