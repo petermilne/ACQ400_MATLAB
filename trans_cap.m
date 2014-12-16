@@ -10,8 +10,8 @@
 % <table border=1><tr>
 %     <td>     Argument      </td><td>  Description                                                                                                              </td></tr><tr>
 %     <td><b>  card      </b></td><td>  Type of D-TACQ acquistition card in system. 'acq435', 'acq437', 'acq420', 'acq425'                                       </td></tr><tr>
-%     <td><b>  num_samp  </b></td><td>  Number of samples                                                                                                        </td></tr><tr>
 %     <td><b>  pre       </b></td><td>  For use with pre/post EVENT mode. Number of samples to record prior to trigger. Should be zero if not in EVENT mode.     </td></tr><tr>
+%     <td><b>  post      </b></td><td>  Number of samples after trigger for EVENT mode. For other modes this is effectively total number of samples.             </td></tr><tr>
 %     <td><b>  ch_mask   </b></td><td>  Channel mask. This can be a scalar or vector.                                                                            </td></tr><tr>
 %     <td>     -             </td><td>  SCALAR : capture will record channels corresponding to 1:ch_mask                                                         </td></tr><tr>
 %     <td>     -             </td><td>  VECTOR : capture will record channels specified in mask, e.g. [1,2,5,10] will record channels CH01,CH02,CH05 &amp; CH10  </td></tr><tr>
@@ -22,12 +22,13 @@
 %     <td><b>  rate      </b></td><td>  Sampling rate in Hz. The program will warn the user if this is outside supported clock limits                            </td></tr></table>
 % </html>
 %
-% The maximum number of samples which can be pulled is *512MB / NCHAN / 4*. MATLAB is not very efficient for transients aprroaching this maximum.
+% The maximum number of samples which can be pulled is *500,000*.
 %
 %%
-function trans_cap(card,num_samp,pre,ch_mask,trig,rate)
+function trans_cap(card,pre,post,ch_mask,trig,rate)
 %tic
     global UUT %Make base workspace variable visible in function
+    done = 0;
     
     % Check that Carrier has completed boot
     result = boot_complete();
@@ -38,13 +39,22 @@ function trans_cap(card,num_samp,pre,ch_mask,trig,rate)
     [resolution,variable_gain] = get_res(card);
     vsf = calc_vsf(resolution,variable_gain); % Voltage Scaling Factor
     
-    %% Special option for contiguous 1:ch_mask channels
+    % Catch errors
+    if strcmp(trig,'event') == 0
+        if pre > 0; fprintf(2,'PRE is greater than ZERO. This is only valid in EVENT mode!\n'); pre=0; end
+        if post > 500000; fprintf(2,'POST is greater than 500,000! Please reduce number of samples and try again...\n'); return; end
+    else
+        if (pre + post) > 16384; fprintf(2,'In EVENT mode PRE + POST must be < 16384. Too many samples requested!\n'); return; end
+    end
+    num_samp = pre + post;
+    
+    % Special option for contiguous 1:ch_mask channels
     if length(ch_mask) == 1
         ch_mask = [1:ch_mask];
     end
     
     
-    %% Configure port and open
+    % Configure port and open
     ID = tcpip(UUT,4220); % 4220 = System Controller
     ID.terminator = 10; % ASCII line feed
     ID.InputBufferSize = 100;
@@ -52,7 +62,7 @@ function trans_cap(card,num_samp,pre,ch_mask,trig,rate)
     fopen(ID);
     
     
-    %% Query the value of shot_complete on UUT
+    % Query the value of shot_complete on UUT
     command = 'shot_complete';
     fprintf(ID,command);
     shotc_before = fscanf(ID); % Map response of query to 'shotc_before'
@@ -60,11 +70,13 @@ function trans_cap(card,num_samp,pre,ch_mask,trig,rate)
     %disp(shotc_before)
     
     
-    %% Set up trigger source, request transient and arm
-    transient_commands(1,trig,num_samp,pre);
+    % Set up trigger source, request transient and arm
+    transient_commands(1,trig,post,pre);
     
+    % Monitor log port for trigger
+    monitor_log('trigger');
 
-    %% Poll shot_complete
+    % Poll shot_complete
     %  Map result to shotc_after. When it increments, and shotc_after is
     %  one greater than shotc_before loop breaks.
     command = 'shot_complete';
@@ -73,6 +85,7 @@ function trans_cap(card,num_samp,pre,ch_mask,trig,rate)
         fprintf(ID,command);
         shotc_after = fscanf(ID);
         shotc_after = str2double(shotc_after);
+        if (done == 0)done = monitor_log('samples_captured'); end
         %disp(shotc_after)
         
         if (shotc_after > shotc_before)
@@ -85,76 +98,11 @@ function trans_cap(card,num_samp,pre,ch_mask,trig,rate)
     delete(ID);
     
     
-    %% Pull transient data from channels 53001:530XX
+    % Pull transient data from channels 53001:530XX
     %  Store results in cell array indexed 1:XX  
-    clear CHx
-    fprintf('...Pulling Channel Data from D-TACQ ACQ...\n\n');
-    for i=ch_mask
-        channel=53000+i;
-        disp(i);
-        CH = tcpip(UUT,channel);
-        set(CH,'ByteOrder','littleEndian'); % Set link endianness
-        CH.terminator = 10; % ASCII carriage returns
-        if resolution == 32
-            CH.InputBufferSize = num_samp*32; % num_samp * 32 bits
-        elseif resolution == 16
-            CH.InputBufferSize = num_samp*16; % num_samp * 16 bits
-        end
-        CH.Timeout = 60;
-        fopen(CH);
-        
-        if resolution == 32
-            CHx{i} = fread(CH,num_samp,'int32');
-        elseif resolution == 16
-            CHx{i} = fread(CH,num_samp,'int16');
-        end
-                
-        % If you wish you can save channel data to binary file for posterity
-        %filename = sprintf('%s_%02d.bin',UUT,i);
-        %f = fopen(filename,'w');
-        %if resolution == 32
-        %    fwrite(f,CHx{i},'int32',0,'b');
-        %elseif resolution == 16
-        %    fwrite(f,CHx{i},'int16',0,'b');
-        %end
-        %fclose(f);
-        
-        fclose(CH);
-        delete(CH);
-    end
+    fetch_data(ch_mask,resolution,num_samp);
     
-    whos CHx
-    fprintf('\n...Data Transfer Complete...\n\n');
-    save('CHx.mat','CHx') % Save MATLAB variable for retrieval in Base Workspace
-    assignin('base', 'CHx', CHx); % Save variable to Base Workspace
-    
-    %% Plot in a figure and enable plotting controls
-    % "hold all" OR one plot command
-    close all; hold all
-        
-    for i=ch_mask
-        CHx{i} = CHx{i}.*vsf(i); % Scale to volts
-    end
-    
-    index = 1:num_samp;
-    %index = index./samp_rate; %Uncomment this line for seconds on x-axis
-        
-    fig1 = figure(1);
-    
-    for i=ch_mask
-        plot(index, CHx{i}) % Plot channel
-        label_array{i} = sprintf('CH%02d',i); % Record labels for figure legend
-    end
-    
-    label_array = label_array(~cellfun('isempty',label_array)); % Remove empty elements from cell array
-    
-    %title('Transient Capture') 
-    xlabel('Samples');
-    %xlabel('Seconds');
-    ylabel('Volts');
-    legend(label_array);
-    hold off
-    set(fig1,'units','normalized','outerposition',[0 0 1 1]); % MATLABs best approximation of maximising figure window.
-    shg
+    % Plot in a figure and enable plotting controls
+    plot_data(ch_mask,vsf,num_samp);
 %toc
 end

@@ -100,6 +100,12 @@ UUT = 'acq2006_014';
 %% <calc_vsf.html calc_vsf.m>
 
 %% <transient_commands.html transient_commands.m>
+
+%% <monitor_log.html monitor_log.m>
+
+%% <fetch_data.html fetch_data.m>
+
+%% <plot_data.html plot_data.m>
     
 %% <set_gains.html set_gains.m>
 

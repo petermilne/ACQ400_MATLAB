@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>transient_commands.m</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-12-12"><meta name="DC.source" content="transient_commands.m"><style type="text/css">
+      --><title>transient_commands.m</title><meta name="generator" content="MATLAB 8.4"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2014-12-16"><meta name="DC.source" content="transient_commands.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -74,9 +74,9 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
     <td>     -             </td><td>  soft - Internal software trigger                                                                                         </td></tr><tr>
     <td>     -             </td><td>  hard - External hardware trigger                                                                                         </td></tr><tr>
     <td>     -             </td><td>  event - External hardware trigger with support for pre/post capture                                                      </td></tr><tr>
-    <td><b>  num_samp  </b></td><td>  Number of samples                                                                                                        </td></tr><tr>
+    <td><b>  post      </b></td><td>  Number of samples after trigger for EVENT mode. For other modes this is effectively total number of samples.             </td></tr><tr>
     <td><b>  pre       </b></td><td>  For use with pre/post EVENT mode. Number of samples to record prior to trigger. Should be zero if not in EVENT mode.     </td></tr><tr></table>
-</p><pre class="codeinput"><span class="keyword">function</span> transient_commands(site, trig, num_samp, pre)
+</p><pre class="codeinput"><span class="keyword">function</span> transient_commands(site, trig, post, pre)
     <span class="keyword">global</span> UUT <span class="comment">%Make base workspace variable visible in function</span>
 
     ID = tcpip(UUT,4220); <span class="comment">% 4220 = System Controller</span>
@@ -89,17 +89,21 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
         clear_event = sprintf(<span class="string">'set.site %d event0=0,0,0'</span>,site); <span class="comment">% Clear event config</span>
         fprintf(ID,clear_event);
         trig_command = sprintf(<span class="string">'set.site %d trg=1,1,1'</span>,site);
-        transient_command = sprintf(<span class="string">'soft_transient %d'</span>,num_samp);
+        transient_command = sprintf(<span class="string">'soft_transient %d'</span>,post);
+        <span class="comment">%transient_command = sprintf('transient PRE=0 POST=%d OSAM=1 SOFT_TRIGGER=1',num_samp);</span>
 
     <span class="keyword">elseif</span> strcmp(trig,<span class="string">'hard'</span>) == 1
         clear_event = sprintf(<span class="string">'set.site %d event0=0,0,0'</span>,site); <span class="comment">% Clear event config</span>
         fprintf(ID,clear_event);
         trig_command = sprintf(<span class="string">'set.site %d trg=1,0,1'</span>,site);
-        transient_command = sprintf(<span class="string">'soft_transient %d'</span>,num_samp);
+        <span class="comment">%transient_command = sprintf('soft_transient %d',num_samp);</span>
+        transient_command = sprintf(<span class="string">'transient PRE=0 POST=%d OSAM=1 SOFT_TRIGGER=0'</span>,post);
 
     <span class="keyword">elseif</span> strcmp(trig,<span class="string">'event'</span>) == 1
+        <span class="comment">%set_trig = sprintf('set.site %d trg=1,1,1',site); % Clear trig config</span>
+        <span class="comment">%fprintf(ID,set_trig);</span>
         trig_command = sprintf(<span class="string">'set.site %d event0=1,0,1'</span>,site);
-        transient_command = sprintf(<span class="string">'transient PRE=%d POST=%d OSAM=1 SOFT_TRIGGER=1'</span>,pre,num_samp);
+        transient_command = sprintf(<span class="string">'transient PRE=%d POST=%d OSAM=1 SOFT_TRIGGER=1'</span>,pre,post);
     <span class="keyword">end</span>
 
     disp(trig_command)
@@ -133,11 +137,11 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 %     <td>     -             </td><td>  soft - Internal software trigger                                                                                         </td></tr><tr>
 %     <td>     -             </td><td>  hard - External hardware trigger                                                                                         </td></tr><tr>
 %     <td>     -             </td><td>  event - External hardware trigger with support for pre/post capture                                                      </td></tr><tr>
-%     <td><b>  num_samp  </b></td><td>  Number of samples                                                                                                        </td></tr><tr>
+%     <td><b>  post      </b></td><td>  Number of samples after trigger for EVENT mode. For other modes this is effectively total number of samples.             </td></tr><tr>
 %     <td><b>  pre       </b></td><td>  For use with pre/post EVENT mode. Number of samples to record prior to trigger. Should be zero if not in EVENT mode.     </td></tr><tr></table>
 % </html>
 
-function transient_commands(site, trig, num_samp, pre)
+function transient_commands(site, trig, post, pre)
     global UUT %Make base workspace variable visible in function
     
     ID = tcpip(UUT,4220); % 4220 = System Controller
@@ -150,17 +154,21 @@ function transient_commands(site, trig, num_samp, pre)
         clear_event = sprintf('set.site %d event0=0,0,0',site); % Clear event config
         fprintf(ID,clear_event);
         trig_command = sprintf('set.site %d trg=1,1,1',site);
-        transient_command = sprintf('soft_transient %d',num_samp);
+        transient_command = sprintf('soft_transient %d',post);
+        %transient_command = sprintf('transient PRE=0 POST=%d OSAM=1 SOFT_TRIGGER=1',num_samp);
         
     elseif strcmp(trig,'hard') == 1
         clear_event = sprintf('set.site %d event0=0,0,0',site); % Clear event config
         fprintf(ID,clear_event);
         trig_command = sprintf('set.site %d trg=1,0,1',site);
-        transient_command = sprintf('soft_transient %d',num_samp);
+        %transient_command = sprintf('soft_transient %d',num_samp);
+        transient_command = sprintf('transient PRE=0 POST=%d OSAM=1 SOFT_TRIGGER=0',post);
         
     elseif strcmp(trig,'event') == 1
+        %set_trig = sprintf('set.site %d trg=1,1,1',site); % Clear trig config
+        %fprintf(ID,set_trig);
         trig_command = sprintf('set.site %d event0=1,0,1',site);
-        transient_command = sprintf('transient PRE=%d POST=%d OSAM=1 SOFT_TRIGGER=1',pre,num_samp);
+        transient_command = sprintf('transient PRE=%d POST=%d OSAM=1 SOFT_TRIGGER=1',pre,post);
     end
     
     disp(trig_command)
