@@ -89,34 +89,34 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
         clear_event = sprintf(<span class="string">'set.site %d event0=0,0,0'</span>,site); <span class="comment">% Clear event config</span>
         fprintf(ID,clear_event);
         trig_command = sprintf(<span class="string">'set.site %d trg=1,1,1'</span>,site);
-        transient_command = sprintf(<span class="string">'soft_transient %d'</span>,post);
-        <span class="comment">%transient_command = sprintf('transient PRE=0 POST=%d OSAM=1 SOFT_TRIGGER=1',num_samp);</span>
+        <span class="comment">%transient_command = sprintf('soft_transient %d',post);</span>
+        transient_command = sprintf(<span class="string">'transient PRE=0 POST=%d OSAM=1 SOFT_TRIGGER=1'</span>,post);
 
     <span class="keyword">elseif</span> strcmp(trig,<span class="string">'hard'</span>) == 1
         clear_event = sprintf(<span class="string">'set.site %d event0=0,0,0'</span>,site); <span class="comment">% Clear event config</span>
         fprintf(ID,clear_event);
         trig_command = sprintf(<span class="string">'set.site %d trg=1,0,1'</span>,site);
-        <span class="comment">%transient_command = sprintf('soft_transient %d',num_samp);</span>
+        <span class="comment">%transient_command = sprintf('soft_transient %d',post);</span>
         transient_command = sprintf(<span class="string">'transient PRE=0 POST=%d OSAM=1 SOFT_TRIGGER=0'</span>,post);
 
     <span class="keyword">elseif</span> strcmp(trig,<span class="string">'event'</span>) == 1
-        <span class="comment">%set_trig = sprintf('set.site %d trg=1,1,1',site); % Clear trig config</span>
-        <span class="comment">%fprintf(ID,set_trig);</span>
+        set_trig = sprintf(<span class="string">'set.site %d trg=1,1,1'</span>,site); <span class="comment">% Clear trig config</span>
+        fprintf(ID,set_trig);
         trig_command = sprintf(<span class="string">'set.site %d event0=1,0,1'</span>,site);
         transient_command = sprintf(<span class="string">'transient PRE=%d POST=%d OSAM=1 SOFT_TRIGGER=1'</span>,pre,post);
     <span class="keyword">end</span>
 
     disp(trig_command)
     fprintf(ID,trig_command); <span class="comment">% Send trigger config command to UUT.</span>
+    fscanf(ID);
 
     disp(transient_command)
     fprintf(ID,transient_command); <span class="comment">% Sets up transient</span>
+    fscanf(ID);
 
     disp(<span class="string">'set_arm'</span>)
     fprintf(ID,<span class="string">'set_arm'</span>); <span class="comment">% Arms transient, wait for trigger</span>
-
-    readback = fscanf(ID);
-    fprintf(<span class="string">'%s'</span>,readback);
+    fscanf(ID);
 
     fclose(ID);
     delete(ID);
@@ -154,34 +154,34 @@ function transient_commands(site, trig, post, pre)
         clear_event = sprintf('set.site %d event0=0,0,0',site); % Clear event config
         fprintf(ID,clear_event);
         trig_command = sprintf('set.site %d trg=1,1,1',site);
-        transient_command = sprintf('soft_transient %d',post);
-        %transient_command = sprintf('transient PRE=0 POST=%d OSAM=1 SOFT_TRIGGER=1',num_samp);
+        %transient_command = sprintf('soft_transient %d',post);
+        transient_command = sprintf('transient PRE=0 POST=%d OSAM=1 SOFT_TRIGGER=1',post);
         
     elseif strcmp(trig,'hard') == 1
         clear_event = sprintf('set.site %d event0=0,0,0',site); % Clear event config
         fprintf(ID,clear_event);
         trig_command = sprintf('set.site %d trg=1,0,1',site);
-        %transient_command = sprintf('soft_transient %d',num_samp);
+        %transient_command = sprintf('soft_transient %d',post);
         transient_command = sprintf('transient PRE=0 POST=%d OSAM=1 SOFT_TRIGGER=0',post);
         
     elseif strcmp(trig,'event') == 1
-        %set_trig = sprintf('set.site %d trg=1,1,1',site); % Clear trig config
-        %fprintf(ID,set_trig);
+        set_trig = sprintf('set.site %d trg=1,1,1',site); % Clear trig config
+        fprintf(ID,set_trig);
         trig_command = sprintf('set.site %d event0=1,0,1',site);
         transient_command = sprintf('transient PRE=%d POST=%d OSAM=1 SOFT_TRIGGER=1',pre,post);
     end
     
     disp(trig_command)
     fprintf(ID,trig_command); % Send trigger config command to UUT.
+    fscanf(ID);
     
     disp(transient_command)
     fprintf(ID,transient_command); % Sets up transient
+    fscanf(ID);
     
     disp('set_arm')
     fprintf(ID,'set_arm'); % Arms transient, wait for trigger
-    
-    readback = fscanf(ID);
-    fprintf('%s',readback);
+    fscanf(ID);
     
     fclose(ID);
     delete(ID);

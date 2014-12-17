@@ -11,8 +11,8 @@ function set_sample_rate(site,rate)
     fopen(ID);
     
     % Catch unsupported clock rates
-    if rate < 10000 || rate > 128000
-        fprintf(2,'Unsupported sample rate! Sample rate must be between 10,000 and 128,000 Hz...\n\n');
+    if rate < 10000 || rate > 100000
+        fprintf(2,'Unsupported sample rate! Sample rate must be between 10,000 and 100,000 Hz...\n\n');
         return;
     end
     

@@ -29,18 +29,16 @@ function transient_commands(site, trig, post, pre)
         clear_event = sprintf('set.site %d event0=0,0,0',site); % Clear event config
         fprintf(ID,clear_event);
         trig_command = sprintf('set.site %d trg=1,1,1',site);
-        %transient_command = sprintf('soft_transient %d',post);
         transient_command = sprintf('transient PRE=0 POST=%d OSAM=1 SOFT_TRIGGER=1',post);
         
     elseif strcmp(trig,'hard') == 1
         clear_event = sprintf('set.site %d event0=0,0,0',site); % Clear event config
         fprintf(ID,clear_event);
         trig_command = sprintf('set.site %d trg=1,0,1',site);
-        %transient_command = sprintf('soft_transient %d',post);
         transient_command = sprintf('transient PRE=0 POST=%d OSAM=1 SOFT_TRIGGER=0',post);
         
     elseif strcmp(trig,'event') == 1
-        set_trig = sprintf('set.site %d trg=1,1,1',site); % Clear trig config
+        set_trig = sprintf('set.site %d trg=1,1,1',site); % Set soft trigger
         fprintf(ID,set_trig);
         trig_command = sprintf('set.site %d event0=1,0,1',site);
         transient_command = sprintf('transient PRE=%d POST=%d OSAM=1 SOFT_TRIGGER=1',pre,post);
@@ -56,9 +54,7 @@ function transient_commands(site, trig, post, pre)
     
     disp('set_arm')
     fprintf(ID,'set_arm'); % Arms transient, wait for trigger
-    
-    readback = fscanf(ID);
-    fprintf('%s',readback);
+    fscanf(ID);
     
     fclose(ID);
     delete(ID);
