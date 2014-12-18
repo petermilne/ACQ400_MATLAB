@@ -22,8 +22,8 @@
 %     <td><b>  rate      </b></td><td>  Sampling rate in Hz. The program will warn the user if this is outside supported clock limits                            </td></tr></table>
 % </html>
 %
-% The maximum number of samples which can be pulled is *500,000*.
-% Maximum number of PRE samples is : 4096 for a 64CH system, 2730 for a 96CH system.
+% The maximum number of samples which can be pulled is *1,000,000*.
+% Maximum number of PRE samples is : *4096* for a 64CH system, *2730* for a 96CH system.
 %
 %%
 function trans_cap(card,pre,post,ch_mask,trig,rate)
@@ -43,9 +43,11 @@ function trans_cap(card,pre,post,ch_mask,trig,rate)
     % Catch errors
     if strcmp(trig,'event') == 0
         if pre > 0; fprintf(2,'PRE is greater than ZERO. This is only valid in EVENT mode!\n'); pre=0; end
-        if post > 500000; fprintf(2,'POST is greater than 500,000! Please reduce number of samples and try again...\n'); return; end
+        if post > 1000000; fprintf(2,'POST is greater than 1,000,000! Please reduce number of samples and try again...\n'); return; end
     else
         if (pre + post) > 40000; fprintf(2,'In EVENT mode PRE + POST must be < 40000. Too many samples requested!\n'); return; end
+        if pre > 2730; fprintf(1,'PRE is greater than 2730! This is the maximum for a 96CH system...\n'); return; end
+        if pre > 4096; fprintf(1,'PRE is greater than 4096! This is the maximum for a 64CH system...\n'); return; end
     end
     num_samp = pre + post;
     
