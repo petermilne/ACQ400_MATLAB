@@ -46,8 +46,8 @@ function trans_cap(card,pre,post,ch_mask,trig,rate)
         if post > 1000000; fprintf(2,'POST is greater than 1,000,000! Please reduce number of samples and try again...\n'); return; end
     else
         if (pre + post) > 40000; fprintf(2,'In EVENT mode PRE + POST must be < 40000. Too many samples requested!\n'); return; end
-        if pre > 2730; fprintf(1,'PRE is greater than 2730! This is the maximum for a 96CH system...\n'); return; end
-        if pre > 4096; fprintf(1,'PRE is greater than 4096! This is the maximum for a 64CH system...\n'); return; end
+        if pre > 2730; fprintf(2,'PRE is greater than 2730! This is the maximum for a 96CH system...\n'); end
+        if pre > 4096; fprintf(2,'PRE is greater than 4096! This is the maximum for a 64CH system...\n'); end
     end
     num_samp = pre + post;
     
