@@ -76,20 +76,17 @@ function trans_cap(card,pre,post,ch_mask,trig,rate)
     % Set up trigger source, request transient and arm
     transient_commands(1,trig,post,pre);
     
-    % Monitor log port for trigger
-    monitor_log('trigger');
+    % Monitor log port for TRIGGER and POST/STOP
+    monitor_log;
 
     % Poll shot_complete
     %  Map result to shotc_after. When it increments, and shotc_after is
     %  one greater than shotc_before loop breaks.
     command = 'shot_complete';
-    fprintf('...Running Transient Capture ...\n');
     while true
         fprintf(ID,command);
         shotc_after = fscanf(ID);
         shotc_after = str2double(shotc_after);
-        if (done == 0)done = monitor_log('samples_captured'); end
-        %disp(shotc_after)
         
         if (shotc_after > shotc_before)
             fprintf('\n...Transient Capture Complete...\n\n');
