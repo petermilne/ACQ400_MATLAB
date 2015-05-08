@@ -16,16 +16,24 @@ function set_sample_rate(site,rate)
         return;
     end
     
-    % Send command to UUT.
-    command = sprintf('ACQ43X_SAMPLE_RATE=%d',rate);
-    fprintf(ID,command);
+    count = 0;
+    while(1)
+        count = count+1;
+        % Send command to UUT.
+        command = sprintf('ACQ43X_SAMPLE_RATE=%d',rate);
+        fprintf(ID,command);
     
-    % Readback new value
-    fprintf(ID,'ACQ43X_SAMPLE_RATE');
-    readback = fscanf(ID); % Pop empty line
-    readback = fscanf(ID);
-    readback(length(readback)) = ''; % Pop the new line off the end of string
-    readback = sprintf('\nNew sample rate = %s Hz\n',readback);
+        % Readback new value
+        fprintf(ID,'ACQ43X_SAMPLE_RATE');
+        readback = fscanf(ID); % Pop empty line
+        readback = fscanf(ID);
+        readback = str2double(readback(19:end-1)); % Pop the string off the front of the number and new line off the end
+        if rate == readback
+            sprintf('Success on attempt number %d',count)
+            break;
+        end
+    end
+    readback = sprintf('\nNew sample rate = %.2E Hz\n',readback);
     disp(readback)
     
     fclose(ID);

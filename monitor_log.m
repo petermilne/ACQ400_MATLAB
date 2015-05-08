@@ -17,7 +17,7 @@ function monitor_log()
         if strcmp(readback(1),'3') == 1 % When we move out of arm we know trigger has been received.
             fprintf('\n...Trigger received...\n\n');
             fprintf('...Running Transient Capture ...\n');
-            return;
+            break;
         end
     end
     
