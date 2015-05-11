@@ -2,8 +2,11 @@
 function auto_test(num_runs)
 
 freq = 10000;
+run_count=0;
 
-for run_count=1:num_runs
+%for run_count=1:num_runs
+while(1)
+    run_count = run_count+1;
     run_count
     
     CHx_old = evalin('base','CHx');
@@ -43,7 +46,7 @@ for run_count=1:num_runs
         freq = 10000;
     end
     
-    pause(1)
+    %pause(0.5)
     %close all
 
 end

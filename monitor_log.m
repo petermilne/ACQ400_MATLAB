@@ -10,9 +10,15 @@ function monitor_log()
     fopen(ID);
     
     sample_count ='0';
+    lastwarn('');
     
     while(1)
         readback = fscanf(ID);
+        if findstr('Unsuccessful read',lastwarn)
+            disp('I caught a timeout')
+            lastwarn('');
+            readback = fscanf(ID);
+        end
         
         if strcmp(readback(1),'3') == 1 % When we move out of arm we know trigger has been received.
             fprintf('\n...Trigger received...\n\n');
@@ -24,6 +30,11 @@ function monitor_log()
     
     while(1)
         readback = fscanf(ID);
+        if findstr('Unsuccessful read',lastwarn)
+            disp('I caught a timeout')
+            lastwarn('');
+            readback = fscanf(ID);
+        end
                  
         if (strcmp(readback(1),'1') == 1 || strcmp(readback(1),'2') == 1 || strcmp(readback(1),'3') == 1) % If transient is ongoing printout number of samples captured so far.
             readback = textscan(readback,'%f');

@@ -101,6 +101,12 @@ function trans_cap(card,pre,post,ch_mask,trig,rate)
     % Pull transient data from channels 53001:530XX
     %  Store results in cell array indexed 1:XX  
     fetch_data(ch_mask,resolution,num_samp);
+    % Catch data timeout
+    if findstr('Unsuccessful read',lastwarn)
+        disp('I caught a timeout')
+        lastwarn('');
+        fetch_data(ch_mask,resolution,num_samp);
+    end
     
     % Plot in a figure and enable plotting controls
     plot_data(ch_mask,vsf,num_samp);

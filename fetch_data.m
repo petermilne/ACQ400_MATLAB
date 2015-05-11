@@ -4,6 +4,7 @@ function fetch_data(ch_mask,resolution,num_samp)
     global UUT %Make base workspace variable visible in function
     
     clear CHx
+    lastwarn('');
     fprintf('...Pulling Channel Data from D-TACQ ACQ...\n\n');
     for i=ch_mask
         channel=53000+i;
