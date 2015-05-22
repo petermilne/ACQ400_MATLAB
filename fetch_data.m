@@ -17,7 +17,7 @@ function fetch_data(ch_mask,resolution,num_samp)
         elseif resolution == 16
             CH.InputBufferSize = num_samp*16; % num_samp * 16 bits
         end
-        CH.Timeout = 60;
+        CH.Timeout = 2;
         fopen(CH);
         
         if resolution == 32

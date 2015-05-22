@@ -61,7 +61,7 @@ function trans_cap(card,pre,post,ch_mask,trig,rate)
     ID = tcpip(UUT,4220); % 4220 = System Controller
     ID.terminator = 10; % ASCII line feed
     ID.InputBufferSize = 100;
-    ID.Timeout = 60;
+    ID.Timeout = 5;
     fopen(ID);
     
     
@@ -103,7 +103,6 @@ function trans_cap(card,pre,post,ch_mask,trig,rate)
     fetch_data(ch_mask,resolution,num_samp);
     % Catch data timeout
     if findstr('Unsuccessful read',lastwarn)
-        disp('I caught a timeout')
         lastwarn('');
         fetch_data(ch_mask,resolution,num_samp);
     end

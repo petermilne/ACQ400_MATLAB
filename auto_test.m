@@ -46,7 +46,7 @@ while(1)
         freq = 10000;
     end
     
-    %pause(0.5)
+    %pause(1)
     %close all
 
 end

@@ -7,7 +7,7 @@ function set_sample_rate(site,rate)
     ID = tcpip(UUT,4220+site); % 4220 = System Controller
     ID.terminator = 10; % ASCII line feed
     ID.InputBufferSize = 100;
-    ID.Timeout = 60;
+    ID.Timeout = 5;
     fopen(ID);
     
     % Catch unsupported clock rates
@@ -28,9 +28,25 @@ function set_sample_rate(site,rate)
         readback = fscanf(ID); % Pop empty line
         readback = fscanf(ID);
         readback = str2double(readback(19:end-1)); % Pop the string off the front of the number and new line off the end
+        
+        fprintf(ID,'hi_res_mode');
+        hi_res_mode = str2double(fscanf(ID));
         if rate == readback
-            sprintf('Success on attempt number %d',count)
-            break;
+            if (rate < 50000)
+                if hi_res_mode == 1
+                    break;
+                else
+                    fprintf(ID,'hi_res_mode 1');
+                    break;
+                end
+            elseif (rate >= 50000)
+                if hi_res_mode == 0
+                    break;
+                else
+                    fprintf(ID,'hi_res_mode 0');
+                    break;
+                end
+            end
         end
     end
     readback = sprintf('\nNew sample rate = %.2E Hz\n',readback);
