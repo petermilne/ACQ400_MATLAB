@@ -6,7 +6,7 @@ function monitor_log()
     ID = tcpip(UUT,2235); % 2235 = Transient Log
     ID.terminator = 10; % ASCII line feed
     ID.InputBufferSize = 200;
-    ID.Timeout = 60;
+    ID.Timeout = 5;
     fopen(ID);
     
     sample_count ='0';

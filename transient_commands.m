@@ -22,7 +22,7 @@ function transient_commands(site, trig, post, pre)
     ID = tcpip(UUT,4220); % 4220 = System Controller
     ID.terminator = 10; % ASCII line feed
     ID.InputBufferSize = 100;
-    ID.Timeout = 60;
+    ID.Timeout = 5;
     fopen(ID);
     
     if strcmp(trig,'soft') == 1
