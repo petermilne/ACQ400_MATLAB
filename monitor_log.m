@@ -44,7 +44,7 @@ function monitor_log()
                  
         if (strcmp(readback(1),'1') == 1 || strcmp(readback(1),'2') == 1 || strcmp(readback(1),'3') == 1) % If transient is ongoing printout number of samples captured so far.
             readback = textscan(readback,'%f');
-            readback = readback{1}';
+            readback = readback{1};
             
             if strcmp(sample_count,readback(3)) == 0 % Only printout when sample number has updated.
                 readout = sprintf('   Samples captured = %i\n',readback(3));
