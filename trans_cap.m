@@ -36,9 +36,7 @@ function trans_cap(card,pre,post,ch_mask,trig,rate)
     if result == 0; return; end;
     
     disp(UUT)
-    if strfind(card,'acq43')
-        set_sample_rate(1,rate); % Set up sampling rate
-    end
+    set_sample_rate(1,card,rate); % Set up sampling rate
     [resolution,variable_gain] = get_res(card);
     vsf = calc_vsf(resolution,variable_gain); % Voltage Scaling Factor
     

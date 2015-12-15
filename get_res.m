@@ -5,7 +5,7 @@
 function [resolution,variable_gain] = get_res(card)
     if strcmp(card,'acq435') || strcmp(card,'acq437')
         resolution = 32;
-    elseif strcmp(card,'acq420') || strcmp(card,'acq425') || strcmp(card,'acq424')
+    elseif strcmp(card,'acq420') || strcmp(card,'acq425') || strcmp(card,'acq424') || strcmp(card,'acq480')
         resolution = 16;
     end
     
