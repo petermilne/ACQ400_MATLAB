@@ -28,7 +28,7 @@ function wavegen_424(site,nchan,loop,s_trig)
     fopen(ID);
     
     %command = sprintf('wavegen --loop %d 1:%d=ch%%02d', loop, nchan);
-    command = sprintf('wavegen -R 1 1:%d=ch%%02d', nchan);
+    command = sprintf('wavegen --loop %d -R 1 1:%d=ch%%02d', loop, nchan);
     fprintf(ID,command);
     
     readback = fscanf(ID);
